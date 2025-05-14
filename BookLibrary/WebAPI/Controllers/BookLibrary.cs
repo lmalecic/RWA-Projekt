@@ -20,7 +20,7 @@ namespace WebAPI.Controllers
         [HttpGet]
         public IEnumerable<string> Get()
         {
-            throw new NotImplementedException();
+            return new string[] { "value1", "value2" };
         }
 
         // GET api/<BookLibrary>/5
