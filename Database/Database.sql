@@ -17,11 +17,16 @@ go
 
 create table Book (
 	Id int primary key identity,
-	Author nvarchar(50) not null,
+	ISBN nvarchar(20) unique not null,
 	[Name] nvarchar(255) not null,
 	[Description] nvarchar(max),
 	PublicationDate date,
-	ISBN nvarchar(20) unique
+)
+go
+
+create table Author (
+	Id int primary key identity,
+	[Name] nvarchar(50) not null,
 )
 go
 
@@ -29,6 +34,13 @@ create table [Location] (
 	Id int primary key identity,
 	[Name] nvarchar(50) not null,
 	[Address] nvarchar(max) not null,
+)
+go
+
+create table BookAuthor (
+	BookId int foreign key references Book(Id),
+	AuthorId int foreign key references Author(Id),
+	primary key (BookId, AuthorId)
 )
 go
 
@@ -80,4 +92,28 @@ create table BookLog (
 	[Level] int not null,
 	[Message] nvarchar(max) not null,
 )
+go
+
+insert into Author ([Name]) -- 1
+values ('Bogdan Laloviæ')
+insert into Author ([Name]) -- 2
+values ('Adolf Hitler')
+insert into Author ([Name]) -- 3
+values ('Friedrich Engels')
+insert into Author ([Name]) -- 4
+values ('Karl Marx')
+go
+
+insert into Book ([Name], ISBN)
+values ('Minecraft', '12345678901234567890') -- 1
+insert into Book ([Name], ISBN)
+values ('Mein kampf', '953-6859-00-9') -- 2
+insert into Book ([Name], ISBN)
+values ('The Communist Manifesto', '978-0-7178-0241-8') -- 3
+go
+
+insert into BookAuthor (BookId, AuthorId) values (1, 1)
+insert into BookAuthor (BookId, AuthorId) values (2, 2)
+insert into BookAuthor (BookId, AuthorId) values (3, 3)
+insert into BookAuthor (BookId, AuthorId) values (3, 4)
 go
