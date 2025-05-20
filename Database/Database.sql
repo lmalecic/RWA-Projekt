@@ -18,7 +18,7 @@ go
 
 create table Book (
 	Id int primary key identity,
-	ISBN nvarchar(20) unique not null,
+	ISBN nvarchar(17) unique not null,
 	[Name] nvarchar(255) not null,
 	Author nvarchar(255) not null,
 	[Description] nvarchar(max),

@@ -21,5 +21,16 @@ namespace DAL.DTO
         public DateOnly? PublicationDate { get; set; }
 
         public int GenreId { get; set; }
+
+        public BookDto Clone() => new BookDto
+        {
+            Id = Id,
+            Isbn = Isbn,
+            Name = Name,
+            Author = Author,
+            Description = Description,
+            PublicationDate = PublicationDate,
+            GenreId = GenreId
+        };
     }
 }

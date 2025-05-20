@@ -3,6 +3,7 @@ using DAL.DTO;
 using DAL.Models;
 using DAL.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -68,7 +69,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("[action]")]
-        public IActionResult Search(int count = 10, int? page = 1, string? name = null, string? author = null, int? genreId = null)
+        public IActionResult Search(int count = 10, int? page = 1, string? name = null, string? author = null, int? genreId = null, string? description = null)
         {
             try {
                 if (page < 1 || count < 1) {
@@ -86,6 +87,9 @@ namespace WebAPI.Controllers
 
                 if (!string.IsNullOrWhiteSpace(author))
                     query = query.Where(b => b.Author.Contains(author));
+
+                if (!string.IsNullOrWhiteSpace(description))
+                    query = query.Where(b => b.Description != null ? b.Description.Contains(description) : false);
 
                 var total = query.Count();
 
@@ -158,6 +162,43 @@ namespace WebAPI.Controllers
             }
             catch (Exception ex) {
                 _logService.Log($"An error has occurred while updating book with id={id}.", 3);
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPatch("{id}")]
+        public IActionResult Patch(int id, [FromBody] JsonPatchDocument<BookPatchDto> patchDoc)
+        {
+            if (patchDoc == null) {
+                _logService.Log($"Could not update Book with id={id}; Invalid patch document.", 1);
+                return BadRequest("Invalid patch document.");
+            }
+            var dbBook = _context.Books.FirstOrDefault(x => x.Id == id);
+            if (dbBook == null) {
+                _logService.Log($"Could not update Book with id={id}; not found.", 1);
+                return NotFound($"Book with ID {id} not found.");
+            }
+            try {
+                var original = _mapper.Map<BookDto>(dbBook).Clone();
+                var patched = _mapper.Map<BookPatchDto>(dbBook);
+                patchDoc.ApplyTo(patched, ModelState);
+
+                if (!TryValidateModel(ModelState)) {
+                    _logService.Log($"Could not update Book with id={id}; Invalid patch document.", 1);
+                    return BadRequest(ModelState);
+                }
+
+                _context.Update(_mapper.Map(patched, dbBook));
+                _context.SaveChanges();
+
+                _logService.Log($"Patched Book with id={id}", 0);
+                return Ok(new {
+                    Original = original,
+                    Patched = patched
+                });
+            }
+            catch (Exception ex) {
+                _logService.Log($"An error has occurred while patching book with id={id}.", 3);
                 return StatusCode(500, ex.Message);
             }
         }
