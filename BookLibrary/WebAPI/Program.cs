@@ -1,5 +1,6 @@
 using DAL.AutoMapper;
 using DAL.Models;
+using DAL.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,8 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddScoped<LogService>();
 
 builder.Services.AddDbContext<BookLibraryContext>(options => {
     options.UseSqlServer("name=ConnectionStrings:BookLibrary");

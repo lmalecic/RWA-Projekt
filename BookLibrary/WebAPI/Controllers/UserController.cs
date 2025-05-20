@@ -3,6 +3,8 @@ using DAL.DTO;
 using DAL.Models;
 using DAL.Security;
 using Isopoh.Cryptography.Argon2;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,6 +23,17 @@ namespace WebAPI.Controllers
             this._configuration = configuration;
             this._context = context;
             this._mapper = mapper;
+        }
+
+        [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
+        public ActionResult Get(int id)
+        {
+            var user = _context.Users.FirstOrDefault(x => x.Id == id);
+            if (user == null)
+                NotFound($"User with id {id} not found.");
+
+            return Ok(user);
         }
 
         [HttpGet("[action]")]
@@ -60,7 +73,8 @@ namespace WebAPI.Controllers
                 // Update DTO Id to return it to the client
                 userDto.Id = user.Id;
 
-                return Ok(userDto);
+                var location = Url.Action(nameof(Get), new { id = user.Id });
+                return Created(location, userDto);
 
             }
             catch (Exception ex) {
@@ -95,6 +109,23 @@ namespace WebAPI.Controllers
             catch (Exception ex) {
                 return StatusCode(500, ex.Message);
             }
+        }
+
+        [HttpPut("[action]")]
+        [Authorize]
+        public IActionResult ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
+        {
+            var user = _context.Users.FirstOrDefault(x => x.Username == changePasswordDto.Username);
+            if (user == null)
+                return NotFound($"User {changePasswordDto.Username} not found.");
+
+            if (!Argon2.Verify(user.PwdHash, changePasswordDto.CurrentPassword))
+                return BadRequest("Current password is incorrect.");
+
+            user.PwdHash = Argon2.Hash(changePasswordDto.Password);
+            _context.SaveChanges();
+
+            return Ok("Password successfully changed.");
         }
     }
 }
