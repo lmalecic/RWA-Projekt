@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace WebAPI.Models;
+namespace DAL.Models;
 
 public partial class Location
 {
@@ -9,7 +9,5 @@ public partial class Location
 
     public string Name { get; set; } = null!;
 
-    public string Address { get; set; } = null!;
-
-    public virtual ICollection<Book> Books { get; set; } = new List<Book>();
+    public virtual ICollection<BookLocation> BookLocations { get; set; } = new List<BookLocation>();
 }
