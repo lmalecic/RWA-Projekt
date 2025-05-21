@@ -133,40 +133,6 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpPatch("{id}")]
-        public IActionResult Patch(int id, [FromBody] JsonPatchDocument<BookPatchDto> patchDoc)
-        {
-            if (patchDoc == null) {
-                _logService.Log($"Could not update Book with id={id}; Invalid patch document.", 1);
-                return BadRequest("Invalid patch document.");
-            }
-
-            var dbBook = _context.Books.FirstOrDefault(x => x.Id == id);
-            if (dbBook == null) {
-                _logService.Log($"Could not update Book with id={id}; not found.", 1);
-                return NotFound($"Book with ID {id} not found.");
-            }
-
-            try {
-                var original = _mapper.Map<BookDto>(dbBook).Clone();
-                var patched = _mapper.Map<BookPatchDto>(dbBook);
-                patchDoc.ApplyTo(patched);
-
-                _context.Update(_mapper.Map(patched, dbBook));
-                _context.SaveChanges();
-
-                _logService.Log($"Patched Book with id={id}", 0);
-                return Ok(new {
-                    Original = original,
-                    Patched = patched
-                });
-            }
-            catch (Exception ex) {
-                _logService.Log($"An error has occurred while patching book with id={id}.", 3);
-                return StatusCode(500, ex.Message);
-            }
-        }
-
         // DELETE api/<BookController>/5
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]

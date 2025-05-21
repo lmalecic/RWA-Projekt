@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DAL.DTO;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +9,9 @@ namespace DAL.Services
 {
     public interface IEntityService<T>
     {
-        public T? Get(int id);
+        public T Get(int id);
         public T Create(T entity);
-        public T Update(int id, object entity);
+        public T? Update(int id, IUpdateDto updateDto);
         public T? Delete(int id);
 
         public IEnumerable<T> GetAll();

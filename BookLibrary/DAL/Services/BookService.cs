@@ -75,12 +75,8 @@ namespace DAL.Services
             return entity;
         }
 
-        public Book Update(int id, object updateDto)
+        public Book Update(int id, IUpdateDto updateDto)
         {
-            if (updateDto is not BookUpdateDto) {
-                throw new BadHttpRequestException($"Invalid update object type; expected BookUpdateDto.");
-            }
-
             var existing = Get(id);
             if (existing == null) {
                 throw new BadHttpRequestException($"Could not update book; not found.");

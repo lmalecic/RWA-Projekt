@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DAL.DTO
 {
-    public class BookUpdateDto
+    public class BookUpdateDto : IUpdateDto
     {
         public string Isbn { get; set; } = null!;
 
