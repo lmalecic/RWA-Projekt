@@ -11,6 +11,8 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<LogService>();
+builder.Services.AddScoped<BookService>();
+builder.Services.AddScoped<GenreService>();
 
 builder.Services.AddDbContext<BookLibraryContext>(options => {
     options.UseSqlServer("name=ConnectionStrings:BookLibrary");

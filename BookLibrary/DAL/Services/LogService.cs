@@ -26,6 +26,11 @@ namespace DAL.Services
             return log;
         }
 
+        public BookLog? GetLog(int id)
+        {
+            return this._context.BookLogs.FirstOrDefault(x => x.Id == id);
+        }
+
         public IEnumerable<BookLog> GetLogs()
         {
             return this._context.BookLogs.ToList().Order();

@@ -44,20 +44,5 @@ namespace WebAPI.Controllers
         {
             return Ok(_logService.Count());
         }
-
-        // POST api/<LogController>
-        [HttpPost]
-        public IActionResult Post([FromBody] BookLog bookLog)
-        {
-            try {
-                var log = _logService.Log(bookLog.Message, bookLog.Level);
-                var location = Url.Action(nameof(Get), new { id = bookLog.Id });
-
-                return Created(location, log);
-            }
-            catch (Exception ex) {
-                return StatusCode(500, ex.Message);
-            }
-        }
     }
 }

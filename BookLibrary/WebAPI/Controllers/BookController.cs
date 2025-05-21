@@ -19,12 +19,14 @@ namespace WebAPI.Controllers
         private readonly BookLibraryContext _context;
         private readonly IMapper _mapper;
         private readonly LogService _logService;
+        private readonly BookService _bookService;
 
-        public BookController(BookLibraryContext _context, IMapper _mapper, LogService logService)
+        public BookController(BookLibraryContext _context, IMapper _mapper, LogService logService, BookService bookService)
         {
             this._context = _context;
             this._mapper = _mapper;
             this._logService = logService;
+            this._bookService = bookService;
         }
 
         // GET: api/<BookController>
@@ -32,11 +34,9 @@ namespace WebAPI.Controllers
         public IActionResult Get()
         {
             try {
-                var result = _context.Books;
-                var mappedResult = _mapper.Map<IEnumerable<BookDto>>(result);
-
-                _logService.Log($"Read all Books.", 0);
-                return Ok(mappedResult);
+                var all = _bookService.GetAll();
+                var mapped = _mapper.Map<IEnumerable<BookDto>>(all);
+                return Ok(mapped);
             }
             catch (Exception ex) {
                 _logService.Log($"An error has occurred while getting all books.", 3);
@@ -49,17 +49,12 @@ namespace WebAPI.Controllers
         public IActionResult Get(int id)
         {
             try {
-                var result = _context.Books
-                    .FirstOrDefault(x => x.Id == id);
-
+                var result = _bookService.Get(id);
                 if (result == null) {
-                    _logService.Log($"Could not read Book with id={id}; not found.", 1);
                     return NotFound($"Book with id {id} not found.");
                 }
 
                 var mappedResult = _mapper.Map<BookDto>(result);
-
-                _logService.Log($"Read Book with id={id}", 0);
                 return Ok(mappedResult);
             }
             catch (Exception ex) {
@@ -122,13 +117,9 @@ namespace WebAPI.Controllers
         {
             try {
                 var book = _mapper.Map<Book>(bookDto);
+                _bookService.Create(book); // Use the BookService to create the book
+                bookDto.Id = book.Id; // Set the ID of the newly created book in the DTO
 
-                _context.Books.Add(book);
-                _context.SaveChanges();
-
-                bookDto.Id = book.Id; // Set the ID of the newly created book
-
-                _logService.Log($"Created Book with id={book.Id}", 0);
                 var location = Url.Action(nameof(Get), new { id = book.Id });
                 return Created(location, bookDto);
             }
@@ -141,24 +132,19 @@ namespace WebAPI.Controllers
         // PUT api/<BookController>/5
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] BookDto bookDto)
+        public IActionResult Put(int id, [FromBody] BookUpdateDto updateDto)
         {
-            if (bookDto == null) {
-                _logService.Log($"Could not update Book with id={id}; Invalid book data.", 1);
-                return BadRequest("Invalid book data.");
-            }
-
-            var existingBook = _context.Books.FirstOrDefault(x => x.Id == id);
-            if (existingBook == null) {
-                _logService.Log($"Could not update Book with id={id}; not found.", 1);
-                return NotFound($"Book with ID {id} not found.");
-            }
-
             try {
-                _mapper.Map(bookDto, existingBook);
-                _context.SaveChanges();
-                _logService.Log($"Updated Book with id={id}", 0);
-                return Ok(_mapper.Map<BookDto>(existingBook));
+                var book = _bookService.Update(id, updateDto);
+                if (book == null) {
+                    return NotFound($"Book with ID {id} not found.");
+                }
+
+                return Ok(_mapper.Map<BookDto>(book));
+            }
+            catch (BadHttpRequestException ex) {
+                _logService.Log($"An error has occurred while updating book with id={id}.", 2);
+                return StatusCode(ex.StatusCode, ex.Message);
             }
             catch (Exception ex) {
                 _logService.Log($"An error has occurred while updating book with id={id}.", 3);
@@ -173,20 +159,17 @@ namespace WebAPI.Controllers
                 _logService.Log($"Could not update Book with id={id}; Invalid patch document.", 1);
                 return BadRequest("Invalid patch document.");
             }
+
             var dbBook = _context.Books.FirstOrDefault(x => x.Id == id);
             if (dbBook == null) {
                 _logService.Log($"Could not update Book with id={id}; not found.", 1);
                 return NotFound($"Book with ID {id} not found.");
             }
+
             try {
                 var original = _mapper.Map<BookDto>(dbBook).Clone();
                 var patched = _mapper.Map<BookPatchDto>(dbBook);
-                patchDoc.ApplyTo(patched, ModelState);
-
-                if (!TryValidateModel(ModelState)) {
-                    _logService.Log($"Could not update Book with id={id}; Invalid patch document.", 1);
-                    return BadRequest(ModelState);
-                }
+                patchDoc.ApplyTo(patched);
 
                 _context.Update(_mapper.Map(patched, dbBook));
                 _context.SaveChanges();
@@ -204,22 +187,21 @@ namespace WebAPI.Controllers
         }
 
         // DELETE api/<BookController>/5
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var existingBook = _context.Books.FirstOrDefault(x => x.Id == id);
-            if (existingBook == null) {
-                _logService.Log($"Could not delete book with id={id}; not found.", 0);
-                return NoContent();
-            }
-
             try {
-                _context.Books.Remove(existingBook);
-                _context.SaveChanges();
+                var entity = _bookService.Delete(id);
+                if (entity == null) {
+                    return NoContent();
+                }
 
-                _logService.Log($"Deleted Book with id={id}", 0);
-                return Ok(existingBook);
+                return Ok(_mapper.Map<BookDto>(entity));
+            }
+            catch (BadHttpRequestException ex) {
+                _logService.Log($"An error has occurred while deleting book with id={id}.", 3);
+                return StatusCode(ex.StatusCode, ex.Message);
             }
             catch (Exception ex) {
                 _logService.Log($"An error has occurred while deleting book with id={id}.", 3);
