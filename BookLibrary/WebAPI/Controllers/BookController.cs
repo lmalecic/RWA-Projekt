@@ -64,45 +64,26 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("[action]")]
-        public IActionResult Search(int count = 10, int? page = 1, string? name = null, string? author = null, int? genreId = null, string? description = null)
+        public IActionResult Search(int count = 10, int page = 1, string? name = null, string? author = null, int? genreId = null, string? description = null)
         {
             try {
-                if (page < 1 || count < 1) {
-                    _logService.Log($"Could not search books; page and count must be positive integers.", 1);
-                    return BadRequest("Page and count must be positive integers.");
-                }
-
-                var query = _context.Books.AsQueryable();
-                
-                if (genreId != null)
-                    query = query.Where(b => b.GenreId == genreId);
-
-                if (!string.IsNullOrWhiteSpace(name))
-                    query = query.Where(b => b.Name.Contains(name));
-
-                if (!string.IsNullOrWhiteSpace(author))
-                    query = query.Where(b => b.Author.Contains(author));
-
-                if (!string.IsNullOrWhiteSpace(description))
-                    query = query.Where(b => b.Description != null ? b.Description.Contains(description) : false);
-
-                var total = query.Count();
-
-                var books = query
-                    .Skip(((page ?? 1) - 1) * count)
-                    .Take(count)
-                    .ToList();
-
-                var mappedBooks = _mapper.Map<IEnumerable<BookDto>>(books);
-
-                _logService.Log($"Searched books (name: {name}, author: {author}, page: {page}, count: {count})", 0);
-
-                return Ok(new {
-                    Total = total,
-                    Page = page ?? 1,
+                var result = _bookService.Search(new() {
                     Count = count,
-                    Results = mappedBooks
+                    Page = page,
+                    Name = name,
+                    Author = author,
+                    Description = description,
+                    GenreId = genreId
                 });
+
+                _mapper.Map<IEnumerable<BookDto>>(result.Results);
+
+                return Ok(result);
+            }
+            catch (BadHttpRequestException ex)
+            {
+                _logService.Log("A user has occurred while searching books.", 1);
+                return BadRequest(ex.Message);
             }
             catch (Exception ex) {
                 _logService.Log($"An error has occurred while searching books.", 3);

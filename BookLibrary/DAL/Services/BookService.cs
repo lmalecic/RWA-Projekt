@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure;
 using DAL.DTO;
 using DAL.Models;
 using Microsoft.AspNetCore.Http;
@@ -6,12 +7,40 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace DAL.Services
 {
+    public struct BookSearchParams()
+    {
+        public int Count = 10;
+        public int Page = 1;
+        public string? Name;
+        public string? Author;
+        public string? Description;
+        public int? GenreId;
+    }
+
+    // Generic class candidate: SearchResult<Book>
+    public class BookSearchResult
+    {
+        public int Count;
+        public int Page;
+        public int Total;
+        public IEnumerable<Book> Results;
+
+        public BookSearchResult(int count, int page, int total, IEnumerable<Book> results)
+        {
+            Count = count;
+            Page = page;
+            Total = total;
+            Results = results;
+        }
+    }
+
     public class BookService : IEntityService<Book>
     {
         private readonly BookLibraryContext _context;
@@ -93,6 +122,40 @@ namespace DAL.Services
         {
             _logService.Log($"Retrieved all books.", 0);
             return _context.Books.AsEnumerable();
+        }
+
+        public BookSearchResult Search(BookSearchParams searchParams)
+        {
+            if (searchParams.Page < 1 || searchParams.Count < 1)
+            {
+                _logService.Log($"Could not search books; page and count must be positive integers.", 1);
+                throw new BadHttpRequestException("Page and count must be positive integers.");
+            }
+
+            var query = _context.Books.AsQueryable();
+
+            if (searchParams.GenreId != null)
+                query = query.Where(b => b.GenreId == searchParams.GenreId);
+
+            if (!string.IsNullOrWhiteSpace(searchParams.Name))
+                query = query.Where(b => b.Name.Contains(searchParams.Name));
+
+            if (!string.IsNullOrWhiteSpace(searchParams.Author))
+                query = query.Where(b => b.Author.Contains(searchParams.Author));
+
+            if (!string.IsNullOrWhiteSpace(searchParams.Description))
+                query = query.Where(b => b.Description != null ? b.Description.Contains(searchParams.Description) : false);
+
+            var total = query.Count();
+
+            var books = query
+                .Skip(((searchParams.Page) - 1) * searchParams.Count)
+                .Take(searchParams.Count)
+                .ToList();
+
+            _logService.Log($"Searched books (name: {searchParams.Name}, author: {searchParams.Author}, page: {searchParams.Page}, count: {searchParams.Count})", 0);
+
+            return new BookSearchResult(searchParams.Count, searchParams.Page, total, books);
         }
     }
 }
