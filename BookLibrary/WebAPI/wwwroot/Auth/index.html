@@ -8,8 +8,9 @@
 </head>
 <body>
     <script>
-        if (localStorage.getItem('token')) {
-            window.location.href = 'logs.html';
+        const expiryTime = localStorage.getItem('expiryTime');
+        if (localStorage.getItem('token') || expiryTime && Date.now() < expiryTime) {
+            window.location.href = '/BookLogs/index.html';
         }
     </script>
 
@@ -44,10 +45,11 @@
                 });
 
                 if (!res.ok) throw new Error('Login failed');
-                const { token } = await res.text();
+                const tokenResult = await res.json();
 
-                localStorage.setItem('token', token);
-                window.location.href = 'logs.html';
+                localStorage.setItem('token', tokenResult.token);
+                localStorage.setItem('expiryTime', tokenResult.expiryTime);
+                window.location.href = '/BookLogs/index.html';
             } catch (err) {
                 alert('Error: ' + err.message);
             }

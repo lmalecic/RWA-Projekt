@@ -19,11 +19,6 @@ namespace DAL.Models
             this.Level = level;
             this.Timestamp = DateTime.UtcNow;
         }
-
-        public int CompareTo(BookLog? other)
-        {
-            return other != null ? -Timestamp.CompareTo(other.Timestamp) : 0;
-        }
     }
 
     public static partial class Extensions

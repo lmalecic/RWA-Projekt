@@ -104,7 +104,10 @@ namespace WebAPI.Controllers
 
                 var serializedToken = JwtTokenProvider.CreateToken(secureKey, 120, existingUser.Username, existingUser.Role);
 
-                return Ok(serializedToken);
+                return Ok(new {
+                    token = serializedToken,
+                    expiryTime = DateTime.UtcNow.AddMinutes(120)
+                });
             }
             catch (Exception ex) {
                 return StatusCode(500, ex.Message);

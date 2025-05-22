@@ -30,7 +30,7 @@ namespace WebAPI.Controllers
         }
 
         // GET api/<LogController>/5
-        [HttpGet("[action]/{n}")]
+        [HttpGet("{n}")]
         public IActionResult Get(int n)
         {
             var logs = _logService.GetLogs()

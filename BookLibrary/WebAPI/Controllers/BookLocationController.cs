@@ -34,15 +34,15 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post(int id1, int id2)
+        public IActionResult Post(int bookId, int locationId)
         {
             try {
-                var result = _bookLocationService.Create(id1, id2);
+                var result = _bookLocationService.Create(bookId, locationId);
                 var mapped = _mapper.Map<BookLocationDto>(result);
                 return Ok(mapped);
             }
             catch (Exception ex) {
-                _logService.Log($"An error has occurred while associating bookId {id1} with locationId {id2}.", 2);
+                _logService.Log($"An error has occurred while associating bookId {bookId} with locationId {locationId}.", 2);
                 return StatusCode(500, ex.Message);
             }
         }

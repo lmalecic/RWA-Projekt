@@ -33,7 +33,9 @@ namespace DAL.Services
 
         public IEnumerable<BookLog> GetLogs()
         {
-            return this._context.BookLogs.ToList().Order();
+            return this._context.BookLogs
+                .ToList()
+                .Order();
         }
 
         public int Count()
