@@ -36,7 +36,7 @@ namespace WebAPI.Controllers
             return Ok(user);
         }
 
-        [HttpGet]
+        [HttpGet("[action]")]
         public IActionResult GetToken()
         {
             try {
@@ -53,7 +53,7 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("[action]")]
         public IActionResult Register(UserDto userDto)
         {
             try {
@@ -82,19 +82,19 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("[action]")]
         public IActionResult Login(UserLoginDto userDto)
         {
             try {
                 var genericLoginFail = "Incorrect username or password";
 
                 // Try to get a user from database
-                var existingUser = _context.Users.FirstOrDefault(x => x.Username == userDto.Username);
-                if (existingUser == null)
+                var user = _context.Users.FirstOrDefault(x => x.Username == userDto.Username);
+                if (user == null)
                     return BadRequest(genericLoginFail);
 
                 // Check is password hash matches
-                if (!Argon2.Verify(existingUser.PwdHash, userDto.Password))
+                if (!Argon2.Verify(user.PwdHash, userDto.Password))
                     return BadRequest(genericLoginFail);
 
                 // Create and return JWT token
@@ -102,7 +102,7 @@ namespace WebAPI.Controllers
                 if (secureKey == null)
                     throw new Exception("JWT SecureKey is not set in appsettings.json!");
 
-                var serializedToken = JwtTokenProvider.CreateToken(secureKey, 120, existingUser.Username, existingUser.Role);
+                var serializedToken = JwtTokenProvider.CreateToken(secureKey, 120, user.Username, user.Role);
 
                 return Ok(new {
                     token = serializedToken,
@@ -114,7 +114,7 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPut("[action]")]
         [Authorize]
         public IActionResult ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
         {
