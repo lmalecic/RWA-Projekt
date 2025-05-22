@@ -22,5 +22,5 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DAL\DAL.csproj" />
-  </ItemGroup>
+  </ItemGroup>   
 </Project>

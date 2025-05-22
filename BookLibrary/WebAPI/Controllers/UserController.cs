@@ -36,7 +36,7 @@ namespace WebAPI.Controllers
             return Ok(user);
         }
 
-        [HttpGet("[action]")]
+        [HttpGet]
         public IActionResult GetToken()
         {
             try {
@@ -53,7 +53,7 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpPost("[action]")]
+        [HttpPost]
         public IActionResult Register(UserDto userDto)
         {
             try {
@@ -82,7 +82,7 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpPost("[action]")]
+        [HttpPost]
         public IActionResult Login(UserLoginDto userDto)
         {
             try {
@@ -114,7 +114,7 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpPut("[action]")]
+        [HttpPut]
         [Authorize]
         public IActionResult ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
         {
