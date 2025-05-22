@@ -25,7 +25,7 @@
         const token = localStorage.getItem('token');
         const expiryTime = localStorage.getItem('expiryTime');
         const loginUrl = 'login.html';
-        if ((token && expiryTime && Date.now() >= expiryTime) || !token || !expiryTime) {
+        if ((expiryTime ? Date.now() >= expiryTime : true) || !token) {
             localStorage.removeItem('token');
             localStorage.removeItem('expiryTime');
             window.location.href = loginUrl;
