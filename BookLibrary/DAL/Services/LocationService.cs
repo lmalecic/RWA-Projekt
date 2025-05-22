@@ -2,7 +2,7 @@
 using DAL.DTO;
 using DAL.Models;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,41 +11,39 @@ using System.Threading.Tasks;
 
 namespace DAL.Services
 {
-    public class GenreService : IEntityService<Genre>
+    public class LocationService : IEntityService<Location>
     {
         private readonly BookLibraryContext _context;
         private readonly IMapper _mapper;
 
-        public GenreService(BookLibraryContext context, IMapper mapper)
+        public LocationService(BookLibraryContext context, IMapper mapper)
         {
-            _context = context;
-            _mapper = mapper;
+            this._context = context;
+            this._mapper = mapper;
         }
 
-        public Genre Get(int id)
+        public Location Get(int id)
         {
-            var entity = _context.Genres.FirstOrDefault(x => x.Id == id);
+            var entity = _context.Locations
+                .Include(x => x.BookLocations)
+                .FirstOrDefault(x => x.Id == id);
             if (entity == null) {
-                throw new FileNotFoundException($"Genre with id {id} does not exist.");
+                throw new FileNotFoundException($"Location with id {id} does not exist.");
             }
 
             return entity;
         }
 
-        public Genre Create(Genre entity)
+        public Location Create(Location entity)
         {
-            _context.Genres.Add(entity);
+            _context.Locations.Add(entity);
             _context.SaveChanges();
 
             return entity;
         }
 
-        public Genre Update(int id, IUpdateDto updateDto)
+        public Location Update(int id, IUpdateDto updateDto)
         {
-            if (!this.Exists(id)) {
-                throw new FileNotFoundException($"Genre with id {id} does not exist.");
-            }
-
             var entity = this.Get(id);
 
             _mapper.Map(updateDto, entity);
@@ -54,32 +52,32 @@ namespace DAL.Services
             return entity;
         }
 
-        public Genre? Delete(int id)
+        public Location? Delete(int id)
         {
             if (!this.Exists(id)) {
                 return null;
             }
 
             var entity = this.Get(id);
-            var isUsedInBooks = _context.Books.Any(r => r.GenreId == entity.Id);
-            if (isUsedInBooks) {
+            var hasBooks = entity.BookLocations.Count != 0;
+            if (hasBooks) {
                 throw new BadHttpRequestException($"Could not delete genre because it is used in books.");
             }
 
-            _context.Genres.Remove(entity);
+            _context.Locations.Remove(entity);
             _context.SaveChanges();
 
             return entity;
         }
 
-        public IEnumerable<Genre> GetAll()
+        public IEnumerable<Location> GetAll()
         {
-            return _context.Genres.AsEnumerable();
+            return _context.Locations.AsEnumerable();
         }
 
         public bool Exists(int id)
         {
-            return _context.Genres.Any(x => x.Id == id);
+            return _context.Locations.Any(x => x.Id == id);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DAL.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,6 +21,7 @@ namespace DAL.DTO
 
         public DateOnly? PublicationDate { get; set; }
 
+        [Exists<Genre>(ErrorMessage = "Invalid genre id!")]
         public int GenreId { get; set; }
 
         public BookDto Clone() => new BookDto

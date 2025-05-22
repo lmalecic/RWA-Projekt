@@ -18,8 +18,8 @@ namespace WebAPI.Controllers
     {
         private readonly BookLibraryContext _context;
         private readonly IMapper _mapper;
-        private readonly LogService _logService;
         private readonly BookService _bookService;
+        private readonly LogService _logService;
 
         public BookController(BookLibraryContext _context, IMapper _mapper, LogService logService, BookService bookService)
         {
@@ -34,9 +34,9 @@ namespace WebAPI.Controllers
         public IActionResult Get()
         {
             try {
-                var all = _bookService.GetAll();
-                var mapped = _mapper.Map<IEnumerable<BookDto>>(all);
-                return Ok(mapped);
+                var all = _bookService.GetAll()
+                    .Select(_mapper.Map<BookDto>);
+                return Ok(all);
             }
             catch (Exception ex) {
                 _logService.Log($"An error has occurred while getting all books.", 3);
@@ -50,12 +50,12 @@ namespace WebAPI.Controllers
         {
             try {
                 var result = _bookService.Get(id);
-                if (result == null) {
-                    return NotFound($"Book with id {id} not found.");
-                }
-
                 var mappedResult = _mapper.Map<BookDto>(result);
                 return Ok(mappedResult);
+            }
+            catch (FileNotFoundException ex) {
+                _logService.Log($"An error has occurred while getting id={id}.", 2);
+                return NotFound(ex.Message);
             }
             catch (Exception ex) {
                 _logService.Log($"An error has occurred while getting id={id}.", 3);
@@ -76,8 +76,6 @@ namespace WebAPI.Controllers
                     GenreId = genreId
                 });
 
-                _mapper.Map<IEnumerable<BookDto>>(result.Results);
-
                 return Ok(result);
             }
             catch (BadHttpRequestException ex)
@@ -94,15 +92,19 @@ namespace WebAPI.Controllers
         // POST api/<BookController>
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public IActionResult Post([FromBody] BookDto bookDto)
+        public IActionResult Post([FromBody] BookUpdateDto? bookUpdateDto)
         {
-            try {
-                var book = _mapper.Map<Book>(bookDto);
-                _bookService.Create(book); // Use the BookService to create the book
-                bookDto.Id = book.Id; // Set the ID of the newly created book in the DTO
+            if (bookUpdateDto == null) {
+                _logService.Log($"An error has occurred while creating a new book.", 2);
+                return BadRequest("Book data is null.");
+            }
 
+            try {
+                var newBook = _mapper.Map<Book>(bookUpdateDto);
+                var book = _bookService.Create(newBook);
+                var mapped = _mapper.Map<BookDto>(book);
                 var location = Url.Action(nameof(Get), new { id = book.Id });
-                return Created(location, bookDto);
+                return Created(location, mapped);
             }
             catch (Exception ex) {
                 _logService.Log($"An error has occurred while creating a new book.", 3);
@@ -117,15 +119,16 @@ namespace WebAPI.Controllers
         {
             try {
                 var book = _bookService.Update(id, updateDto);
-                if (book == null) {
-                    return NotFound($"Book with ID {id} not found.");
-                }
-
-                return Ok(_mapper.Map<BookDto>(book));
+                var mapped = _mapper.Map<BookDto>(book);
+                return Ok(mapped);
+            }
+            catch (FileNotFoundException ex) {
+                _logService.Log($"An error has occurred while updating book with id={id}.", 2);
+                return NotFound(ex.Message);
             }
             catch (BadHttpRequestException ex) {
                 _logService.Log($"An error has occurred while updating book with id={id}.", 2);
-                return StatusCode(ex.StatusCode, ex.Message);
+                return BadRequest(ex.Message);
             }
             catch (Exception ex) {
                 _logService.Log($"An error has occurred while updating book with id={id}.", 3);
@@ -140,15 +143,12 @@ namespace WebAPI.Controllers
         {
             try {
                 var entity = _bookService.Delete(id);
-                if (entity == null) {
-                    return NoContent();
-                }
-
-                return Ok(_mapper.Map<BookDto>(entity));
+                var mapped = _mapper.Map<BookDto>(entity);
+                return Ok(mapped);
             }
             catch (BadHttpRequestException ex) {
                 _logService.Log($"An error has occurred while deleting book with id={id}.", 3);
-                return StatusCode(ex.StatusCode, ex.Message);
+                return BadRequest(ex.Message);
             }
             catch (Exception ex) {
                 _logService.Log($"An error has occurred while deleting book with id={id}.", 3);

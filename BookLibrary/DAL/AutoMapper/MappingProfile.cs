@@ -16,7 +16,6 @@ namespace DAL.AutoMapper
             CreateMap<Models.Book, DTO.BookDto>();
             CreateMap<DTO.BookDto, Models.Book>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
-            CreateMap<Models.Book, DTO.BookPatchDto>().ReverseMap();
             CreateMap<Models.Book, DTO.BookUpdateDto>().ReverseMap();
 
             CreateMap<Models.User, DTO.UserDto>().ReverseMap();
@@ -26,7 +25,14 @@ namespace DAL.AutoMapper
             CreateMap<Models.Genre, DTO.GenreDto>();
             CreateMap<DTO.GenreDto, Models.Genre>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
-            CreateMap<Models.Location, DTO.LocationDto>().ReverseMap();
+            CreateMap<Models.Genre, DTO.GenreUpdateDto>().ReverseMap();
+
+            CreateMap<Models.Location, DTO.LocationDto>();
+            CreateMap<DTO.LocationDto, Models.Location>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
+            CreateMap<Models.Location, DTO.LocationUpdateDto>().ReverseMap();
+
+            CreateMap<Models.BookLocation, DTO.BookLocationDto>().ReverseMap();
         }
     }
 }

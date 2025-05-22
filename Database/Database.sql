@@ -81,6 +81,15 @@ create table BookLog (
 )
 go
 
+-- LOCAL ADMIN USER (for ease)
+insert into [User] (Username, PwdHash, Email, Role)
+values (
+    'admin',
+    '$argon2id$v=19$m=65536,t=3,p=1$2bRp7ir3PTcdxOhsgtHArA$DxXirDpASmqTTp3YWCe47uevElZqjMpXYy12e6Ur8B4',
+    'admin@localhost',
+    'Admin'
+)
+go
 
 /*
 	BOOK INSERT QUERIES

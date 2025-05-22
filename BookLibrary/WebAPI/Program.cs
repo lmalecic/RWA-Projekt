@@ -4,6 +4,7 @@ using DAL.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -12,7 +13,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<LogService>();
 builder.Services.AddScoped<BookService>();
-builder.Services.AddScoped<GenreService>();
+builder.Services.AddScoped<IEntityService<Book>, BookService>();
+builder.Services.AddScoped<IEntityService<Genre>, GenreService>();
+builder.Services.AddScoped<IEntityService<Location>, LocationService>();
+builder.Services.AddScoped<IAssociationService<BookLocation>, BookLocationService>();
 
 builder.Services.AddDbContext<BookLibraryContext>(options => {
     options.UseSqlServer("name=ConnectionStrings:BookLibrary");
@@ -87,6 +91,11 @@ if (app.Environment.IsDevelopment())
 //app.UseHttpsRedirection();
 
 app.UseStaticFiles();
+app.UseFileServer(new FileServerOptions {
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
+    RequestPath = "/wwwroot",
+});
 
 app.UseAuthentication();
 app.UseAuthorization();

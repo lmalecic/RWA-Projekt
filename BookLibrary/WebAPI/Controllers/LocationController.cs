@@ -3,48 +3,47 @@ using DAL.DTO;
 using DAL.Models;
 using DAL.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GenreController : ControllerBase
+    public class LocationController : ControllerBase
     {
         private readonly BookLibraryContext _context;
         private readonly IMapper _mapper;
-        private readonly IEntityService<Genre> _genreService;
+        private readonly IEntityService<Location> _locationService;
 
-        public GenreController(BookLibraryContext _context, IMapper _mapper, IEntityService<Genre> genreService)
+        public LocationController(BookLibraryContext _context, IMapper _mapper, IEntityService<Location> locationService)
         {
             this._context = _context;
             this._mapper = _mapper;
-            this._genreService = genreService;
+            this._locationService = locationService;
         }
 
-        // GET: api/<GenreController>
+        // GET: api/<LocationController>
         [HttpGet]
         public IActionResult Get()
         {
             try {
-                var result = _genreService.GetAll();
-                var mappedResult = _mapper.Map<IEnumerable<GenreDto>>(result);
-                return Ok(mappedResult);
+                var result = _locationService.GetAll()
+                    .Select(_mapper.Map<LocationDto>);
+                return Ok(result);
             }
             catch (Exception ex) {
                 return StatusCode(500, ex.Message);
             }
         }
 
-        // GET api/<GenreController>/5
+        // GET api/<LocationController>/5
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
             try {
-                var result = _genreService.Get(id);
-                var mappedResult = _mapper.Map<GenreDto>(result);
+                var result = _locationService.Get(id);
+                var mappedResult = _mapper.Map<LocationDto>(result);
                 return Ok(mappedResult);
             }
             catch (FileNotFoundException ex) {
@@ -55,20 +54,19 @@ namespace WebAPI.Controllers
             }
         }
 
-        // POST api/<GenreController>
+        // POST api/<LocationController>
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public IActionResult Post([FromBody] GenreUpdateDto? updateDto)
+        public IActionResult Post([FromBody] LocationUpdateDto? updateDto)
         {
             if (updateDto == null) {
-                return BadRequest("Genre data is null.");
+                return BadRequest("Location data is null.");
             }
 
             try {
-                var genre = _genreService.Create(_mapper.Map<Genre>(updateDto));
-                var mapped = _mapper.Map<GenreDto>(genre);
-                var location = Url.Action(nameof(Get), new { id = genre.Id });
-
+                var entity = _locationService.Create(_mapper.Map<Location>(updateDto));
+                var mapped = _mapper.Map<LocationDto>(entity);
+                var location = Url.Action(nameof(Get), new { id = entity.Id });
                 return Created(location, mapped);
             }
             catch (Exception ex) {
@@ -76,16 +74,17 @@ namespace WebAPI.Controllers
             }
         }
 
-        // PUT api/<GenreController>/5
+        // PUT api/<LocationController>/5
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] GenreUpdateDto genreUpdateDto)
+        public IActionResult Put(int id, [FromBody] LocationUpdateDto updateDto)
         {
             try {
-                var existingGenre = _genreService.Update(id, genreUpdateDto);
-                return Ok(_mapper.Map<GenreDto>(existingGenre));
+                var existing = _locationService.Update(id, updateDto);
+                var mapped = _mapper.Map<LocationDto>(existing);
+                return Ok(mapped);
             }
-            catch (FileNotFoundException ex) {
+            catch (FileNotFoundException ex) { 
                 return NotFound(ex.Message);
             }
             catch (Exception ex) {
@@ -93,14 +92,15 @@ namespace WebAPI.Controllers
             }
         }
 
-        // DELETE api/<GenreController>/5
+        // DELETE api/<LocationController>/5
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
             try {
-                var deleted = _genreService.Delete(id);
-                return Ok(_mapper.Map<GenreDto>(deleted));
+                var entity = _locationService.Delete(id);
+                var mapped = _mapper.Map<LocationDto>(entity);
+                return Ok(mapped);
             }
             catch (BadHttpRequestException ex) {
                 return BadRequest(ex.Message);

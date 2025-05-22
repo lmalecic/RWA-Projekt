@@ -5,6 +5,7 @@ using DAL.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
@@ -24,20 +25,19 @@ namespace DAL.Services
         public int? GenreId;
     }
 
-    // Generic class candidate: SearchResult<Book>
-    public class BookSearchResult
+    public class SearchResult<T>
     {
         public int Count;
         public int Page;
         public int Total;
-        public IEnumerable<Book> Results;
+        public IEnumerable<T> Results;
 
-        public BookSearchResult(int count, int page, int total, IEnumerable<Book> results)
+        public SearchResult(int count, int page, int total, IEnumerable<T> results)
         {
-            Count = count;
-            Page = page;
-            Total = total;
-            Results = results;
+            this.Count = count;
+            this.Page = page;
+            this.Total = total;
+            this.Results = results;
         }
     }
 
@@ -54,12 +54,14 @@ namespace DAL.Services
             _mapper = mapper;
         }
 
-        public Book? Get(int id)
+        public Book Get(int id)
         {
-            var existing = _context.Books.FirstOrDefault(x => x.Id == id);
+            var existing = _context.Books
+                .Include(x => x.BookLocations)
+                .FirstOrDefault(x => x.Id == id);
             if (existing == null) {
                 _logService.Log($"Could not find book with id={id}", 1);
-                return null;
+                throw new FileNotFoundException($"Book with id {id} does not exist.");
             }
 
             _logService.Log($"Retrieved book with id={id}", 0);
@@ -77,14 +79,10 @@ namespace DAL.Services
 
         public Book Update(int id, IUpdateDto updateDto)
         {
-            var existing = Get(id);
-            if (existing == null) {
-                throw new BadHttpRequestException($"Could not update book; not found.");
-            }
+            var existing = this.Get(id);
 
             _mapper.Map(updateDto, existing);
             _context.SaveChanges();
-
             _logService.Log($"Updated book with id={id}", 0);
 
             return existing;
@@ -92,14 +90,16 @@ namespace DAL.Services
 
         public Book? Delete(int id)
         {
-            var entity = Get(id);
-            if (entity == null)
+            if (!this.Exists(id)) {
                 return null;
+            }
+
+            var entity = this.Get(id);
 
             // Check if the book is used in any reservation or review
-            var isUsedInReservations = _context.UserReservations.Any(r => r.BookId == entity.Id);
-            var isUsedInReviews = _context.UserReviews.Any(r => r.BookId == entity.Id);
-            var isUsedInLocations = _context.BookLocations.Any(r => r.BookId == entity.Id);
+            var isUsedInReservations = entity.UserReservations.Count != 0;
+            var isUsedInReviews = entity.UserReviews.Count != 0;
+            var isUsedInLocations = entity.BookLocations.Count != 0;
 
             if (isUsedInReservations || isUsedInReviews || isUsedInLocations) {
                 _logService.Log($"Could not delete book with id={entity.Id}; it is used in reservations, reviews, or locations.", 1);
@@ -120,7 +120,7 @@ namespace DAL.Services
             return _context.Books.AsEnumerable();
         }
 
-        public BookSearchResult Search(BookSearchParams searchParams)
+        public SearchResult<BookDto> Search(BookSearchParams searchParams)
         {
             if (searchParams.Page < 1 || searchParams.Count < 1)
             {
@@ -140,18 +140,26 @@ namespace DAL.Services
                 query = query.Where(b => b.Author.Contains(searchParams.Author));
 
             if (!string.IsNullOrWhiteSpace(searchParams.Description))
-                query = query.Where(b => b.Description != null ? b.Description.Contains(searchParams.Description) : false);
+                query = query.Where(b => b.Description != null ?
+                    b.Description.Contains(searchParams.Description) :
+                    false);
 
             var total = query.Count();
 
             var books = query
-                .Skip(((searchParams.Page) - 1) * searchParams.Count)
+                .Skip((searchParams.Page - 1) * searchParams.Count)
                 .Take(searchParams.Count)
-                .ToList();
+                .AsEnumerable()
+                .Select(_mapper.Map<BookDto>);
 
             _logService.Log($"Searched books (name: {searchParams.Name}, author: {searchParams.Author}, page: {searchParams.Page}, count: {searchParams.Count})", 0);
 
-            return new BookSearchResult(searchParams.Count, searchParams.Page, total, books);
+            return new (searchParams.Count, searchParams.Page, total, books);
+        }
+
+        public bool Exists(int id)
+        {
+            return _context.Books.Any(x => x.Id == id);
         }
     }
 }
