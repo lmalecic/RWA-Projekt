@@ -91,11 +91,6 @@ if (app.Environment.IsDevelopment())
 //app.UseHttpsRedirection();
 
 app.UseStaticFiles();
-app.UseFileServer(new FileServerOptions {
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
-    RequestPath = "/wwwroot",
-});
 
 app.UseAuthentication();
 app.UseAuthorization();
