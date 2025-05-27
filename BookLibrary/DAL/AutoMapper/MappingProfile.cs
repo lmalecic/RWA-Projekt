@@ -19,8 +19,20 @@ namespace DAL.AutoMapper
             CreateMap<Models.Book, DTO.BookUpdateDto>().ReverseMap();
 
             CreateMap<Models.User, DTO.UserDto>().ReverseMap();
-            CreateMap<Models.UserReservation, DTO.UserReservationDto>().ReverseMap();
-            CreateMap<Models.UserReview, DTO.UserReviewDto>().ReverseMap();
+
+            CreateMap<Models.UserReservation, DTO.UserReservationDto>();
+            CreateMap<DTO.UserReservationDto, Models.UserReservation>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Book, opt => opt.Ignore())
+                .ForMember(dest => dest.User, opt => opt.Ignore());
+            CreateMap<Models.UserReservation, DTO.UserReservationUpdateDto>().ReverseMap();
+
+            CreateMap<Models.UserReview, DTO.UserReviewDto>();
+            CreateMap<DTO.UserReviewDto, Models.UserReview>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Book, opt => opt.Ignore())
+                .ForMember(dest => dest.User, opt => opt.Ignore());
+            CreateMap<Models.UserReview, DTO.UserReviewUpdateDto>().ReverseMap();
 
             CreateMap<Models.Genre, DTO.GenreDto>();
             CreateMap<DTO.GenreDto, Models.Genre>()

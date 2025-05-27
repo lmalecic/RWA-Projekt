@@ -16,6 +16,8 @@ builder.Services.AddScoped<BookService>();
 builder.Services.AddScoped<IEntityService<Book>, BookService>();
 builder.Services.AddScoped<IEntityService<Genre>, GenreService>();
 builder.Services.AddScoped<IEntityService<Location>, LocationService>();
+builder.Services.AddScoped<IEntityService<UserReview>, UserReviewService>();
+builder.Services.AddScoped<IEntityService<UserReservation>, UserReservationService>();
 builder.Services.AddScoped<IAssociationService<BookLocation>, BookLocationService>();
 
 builder.Services.AddDbContext<BookLibraryContext>(options => {
