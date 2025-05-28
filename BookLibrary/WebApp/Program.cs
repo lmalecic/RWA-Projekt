@@ -1,7 +1,16 @@
+using DAL.AutoMapper;
+using DAL.Models;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext<BookLibraryContext>(options => {
+    options.UseSqlServer("name=ConnectionStrings:BookLibrary");
+});
 
 var app = builder.Build();
 
