@@ -58,7 +58,11 @@ namespace DAL.Services
         {
             var existing = _context.Books
                 .Include(x => x.BookLocations)
+                .Include(x => x.UserReservations)
+                .Include(x => x.UserReviews)
+                .Include(x => x.Genre)
                 .FirstOrDefault(x => x.Id == id);
+
             if (existing == null) {
                 _logService.Log($"Could not find book with id={id}", 1);
                 throw new FileNotFoundException($"Book with id {id} does not exist.");
@@ -117,7 +121,12 @@ namespace DAL.Services
         public IEnumerable<Book> GetAll()
         {
             _logService.Log($"Retrieved all books.", 0);
-            return _context.Books.AsEnumerable();
+            return _context.Books
+                .Include(x => x.BookLocations)
+                .Include(x => x.UserReservations)
+                .Include(x => x.UserReviews)
+                .Include(x => x.Genre)
+                .AsEnumerable();
         }
 
         public SearchResult<BookDto> Search(BookSearchParams searchParams)

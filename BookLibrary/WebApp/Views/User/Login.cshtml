@@ -1,0 +1,43 @@
+﻿@model WebApp.ViewModels.UserLoginViewModel
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<style>
+    ul {
+        padding-left: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        list-style-type: none !important;
+    }
+</style>
+
+<div class="row position-absolute top-50 start-50 translate-middle">
+    <h3 class="text-center"><strong>Please log in</strong></h3>
+
+    <form class="mt-3" asp-action="Login">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+        <div class="form-group">
+            <label asp-for="Username" class="control-label"></label>
+            <input asp-for="Username" class="form-control mt-2" />
+            <span asp-validation-for="Username" class="text-danger"></span>
+        </div>
+        <div class="form-group mt-2">
+            <label asp-for="Password" class="control-label"></label>
+            <input asp-for="Password" type="password" class="form-control mt-2" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <input asp-for="ReturnUrl" class="form-control" />
+        </div>
+        <div class="form-group mt-4">
+            <input type="submit" value="Log in" class="btn btn-primary w-100" />
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
