@@ -1,8 +1,27 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
+
+    var bgImgPath = "/img/library.jpeg";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    #imgbackground {
+        content: "";
+        background: url("/img/library.jpeg") center/cover no-repeat;
+        object-fit: fill;
+        filter: brightness(60%);
+    }
+</style>
+
+<div class="ratio ratio-16x9">
+    <div id="imgbackground" class="w-100 h-100 rounded-3 bg-dark"></div>
+    <div class="h-100 text-center d-flex flex-column align-items-center justify-content-center">
+        <h1 class="text-white">Online Web Library</h1>
+        <p class="text-white">Your online book companion.</p>
+        <div class="d-flex flex-row gap-2">
+            <a asp-controller="Books" asp-action="Index" class="btn btn-primary">Search Books</a>
+            <a asp-controller="User" asp-action="Login" class="btn btn-primary">Login</a>
+            <a asp-controller="User" asp-action="Register" class="btn btn-primary">Register</a>
+        </div>
+    </div>
 </div>

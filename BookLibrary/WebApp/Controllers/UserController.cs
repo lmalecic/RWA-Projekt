@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using AspNetCoreGeneratedDocument;
+using AutoMapper;
 using DAL.DTO;
 using DAL.Models;
 using Isopoh.Cryptography.Argon2;
@@ -25,22 +26,37 @@ namespace WebApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult Register()
+        public IActionResult Register(string? returnUrl)
         {
-            return View();
+            // User already authenticated, redirect to home or return URL
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return returnUrl != null ? LocalRedirect(returnUrl) : RedirectToAction("Index", "Home");
+            }
+
+            var userViewModel = new UserRegisterViewModel
+            {
+                ReturnUrl = returnUrl
+            };
+
+            return View(userViewModel);
         }
 
         [HttpPost]
         public IActionResult Register(UserViewModel userViewModel)
         {
-            try {
+            try
+            {
                 if (!ModelState.IsValid)
                     return View();
 
                 // Check if there is such a username in the database already
                 var trimmedUsername = userViewModel.Username.Trim();
                 if (_context.Users.Any(x => x.Username.Equals(trimmedUsername)))
-                    return BadRequest($"Username {trimmedUsername} already exists");
+                {
+                    ModelState.AddModelError("", $"Username {trimmedUsername} already exists!");
+                    return View();
+                }
 
                 // Create user from DTO and hashed password
                 var user = _mapper.Map<User>(userViewModel);
@@ -50,10 +66,11 @@ namespace WebApp.Controllers
                 _context.Add(user);
                 _context.SaveChanges();
 
-                return RedirectToAction("Index", "Home");
+                return View("RegisterSuccess", new UserRegisterViewModel { ReturnUrl = userViewModel.ReturnUrl ?? Url.Action("Index", "Home") });
 
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 return StatusCode(500, ex.Message);
             }
         }
@@ -62,15 +79,17 @@ namespace WebApp.Controllers
         public IActionResult Login(string? returnUrl)
         {
             // User already authenticated, redirect to home or return URL
-            if (User.Identity != null && User.Identity.IsAuthenticated) {
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
                 return returnUrl != null ? LocalRedirect(returnUrl) : RedirectToAction("Index", "Home");
             }
 
-            var userViewModel = new UserViewModel {
+            var userViewModel = new UserLoginViewModel
+            {
                 ReturnUrl = returnUrl
             };
 
-            return View();
+            return View(userViewModel);
         }
 
         [HttpPost]

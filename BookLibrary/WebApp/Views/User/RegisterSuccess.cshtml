@@ -1,0 +1,15 @@
+﻿@model WebApp.ViewModels.UserRegisterViewModel
+
+<h2>You have been successfully registered.</h2>
+<a asp-action="Index" asp-controller="Home" class="btn btn-primary">Go home</a>
+
+@section Scripts {
+    @if (Model.ReturnUrl != null)
+    {
+        <script>
+            setTimeout(function() {
+                window.location.href = '@(Model.ReturnUrl)';
+            }, 3000);
+        </script>
+    }   
+}
