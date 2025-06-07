@@ -12,7 +12,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">WebApp</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Web Library</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -22,21 +22,28 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Books" asp-action="Index">Books</a>
+                        <li class="nav-item me-auto">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Book" asp-action="Index">Books</a>
                         </li>
 
+                        @*
+                            Make sure to always put me-auto in the class of the last nav item you want to be on left side.
+                        *@
+
                         @if (User.Identity != null && User.Identity.IsAuthenticated) {
-                            <li class="nav-item ms-auto">
+                            if (User.IsInRole("Admin")) {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Admin panel</a>
+                                </li>
+                            }
+
+                            <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Logout">Logout</a>
                             </li>
                         }
                         else {
-                            <li class="nav-item ms-auto">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Login">Login</a>
-                            </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Register">Register</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Login">Login</a>
                             </li>
                         }
                     </ul>
@@ -52,7 +59,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2025 - WebApp - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - <a href="https://www.algebra.hr/" target="_blank">Algebra University</a> - Luka Malečić
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
