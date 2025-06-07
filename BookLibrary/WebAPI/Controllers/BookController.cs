@@ -76,8 +76,7 @@ namespace WebAPI.Controllers
                     GenreId = genreId
                 });
 
-                var mappedResult = result.Results.Select(_mapper.Map<BookDto>);
-                return Ok(mappedResult);
+                return Ok(result);
             }
             catch (BadHttpRequestException ex)
             {

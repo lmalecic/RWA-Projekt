@@ -1,13 +1,15 @@
-﻿<div class="text-center position-absolute top-50 start-50 translate-middle d-flex flex-column gap-4 align-items-center justify-content-center">
-    <h2 >You have been logged out.</h2>
-    <p>Returning home in 5 seconds...</p>
-    <a asp-action="Index" asp-controller="Home" class="btn btn-primary">Go home</a>
+﻿<div class="position-absolute top-50 start-50 translate-middle d-flex flex-column gap-4 align-items-center justify-content-center">
+    <h2>You have been logged out.</h2>
+    <a asp-action="Index" asp-controller="Home" class="btn btn-lg btn-primary">Go home</a>
 </div>
 
 @section Scripts {
-    <script>
-        setTimeout(function() {
-            window.location.href = '@Url.Action("Index", "Home")';
-        }, 5000);
-    </script>
+    @if (Model.ReturnUrl != null)
+    {
+        <script>
+            setTimeout(function() {
+                window.location.href = '@(Model.ReturnUrl)';
+            }, 3000);
+        </script>
+    }
 }

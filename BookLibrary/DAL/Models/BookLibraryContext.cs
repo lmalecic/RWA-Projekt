@@ -31,6 +31,9 @@ public partial class BookLibraryContext : DbContext
 
     public virtual DbSet<UserReview> UserReviews { get; set; }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        => optionsBuilder.UseSqlServer("Name=ConnectionStrings:BookLibrary");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Book>(entity =>

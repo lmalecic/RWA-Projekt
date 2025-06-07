@@ -63,7 +63,7 @@ namespace WebApp.Controllers
                 user.PwdHash = Argon2.Hash(userViewModel.Password);
 
                 // Add user and save changes to database
-                _context.Users.Add(user);
+                _context.Add(user);
                 _context.SaveChanges();
 
                 return View("RegisterSuccess", new UserRegisterViewModel { ReturnUrl = userViewModel.ReturnUrl ?? Url.Action("Index", "Home") });
@@ -93,7 +93,7 @@ namespace WebApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(UserLoginViewModel loginViewModel)
+        public IActionResult Login(UserLoginViewModel loginViewModel)
         {
             var existingUser = _context.Users
                 .FirstOrDefault(x => x.Username == loginViewModel.Username);
@@ -112,7 +112,7 @@ namespace WebApp.Controllers
 
             var claims = new List<Claim>() {
                 new Claim(ClaimTypes.Name, loginViewModel.Username),
-                new Claim(ClaimTypes.Role, existingUser.Role)
+                new Claim(ClaimTypes.Role, "User")
             };
 
             var claimsIdentity = new ClaimsIdentity(
@@ -121,19 +121,17 @@ namespace WebApp.Controllers
 
             var authProperties = new AuthenticationProperties();
 
-            await HttpContext.SignInAsync(
+            Task.Run(async () =>
+                await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     new ClaimsPrincipal(claimsIdentity),
-                    authProperties);
+                    authProperties)
+            ).GetAwaiter().GetResult();
 
             if (loginViewModel.ReturnUrl != null)
                 return LocalRedirect(loginViewModel.ReturnUrl);
-            else if (existingUser.Role == "Admin")
-                return RedirectToAction("Index", "Admin");
-            else if (existingUser.Role == "User")
-                return RedirectToAction("Index", "Home");
-            else
-                return View();
+
+            return RedirectToAction("Index", "Home");
         }
 
         public IActionResult Logout()
