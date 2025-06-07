@@ -11,6 +11,8 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<LogService>();
 builder.Services.AddScoped<BookService>();
+builder.Services.AddScoped<IEntityService<Genre>, GenreService>();
+builder.Services.AddScoped<IEntityService<Location>, LocationService>();
 
 builder.Services.AddDbContext<BookLibraryContext>(options => {
     options.UseSqlServer("name=ConnectionStrings:BookLibrary");
