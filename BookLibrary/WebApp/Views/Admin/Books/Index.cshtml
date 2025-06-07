@@ -1,0 +1,225 @@
+﻿@model IEnumerable<WebApp.ViewModels.BookViewModel>
+@inject DAL.Services.IEntityService<DAL.Models.Genre> GenreService
+@using DAL.Models
+
+@{
+    ViewData["Title"] = "Books";
+    var genres = GenreService.GetAll();
+    
+    int currentPage = ViewBag.CurrentPage != null ? ViewBag.CurrentPage : 1;
+    int totalPages = ViewBag.TotalPages != null ? ViewBag.TotalPages : 1;
+    
+    var queryParams = new Dictionary<string, string>();
+    foreach (var key in Context.Request.Query.Keys)
+    {
+        if (key != "page" && !string.IsNullOrWhiteSpace(Context.Request.Query[key]))
+        {
+            queryParams[key] = Context.Request.Query[key];
+        }
+    }
+}
+
+@await Html.PartialAsync("_EntityLayout");
+
+<h1>Books</h1>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <form asp-action="Books" method="get" class="card shadow-sm">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-2">
+                        <label for="name" class="form-label">Title</label>
+                        <input type="text" id="name" name="name" class="form-control" placeholder="Book title" value="@Context.Request.Query["name"]">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="author" class="form-label">Author</label>
+                        <input type="text" id="author" name="author" class="form-control" placeholder="Author name" value="@Context.Request.Query["author"]">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="description" class="form-label">Description</label>
+                        <input type="text" id="description" name="description" class="form-control" placeholder="Keywords" value="@Context.Request.Query["description"]">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="genreId" class="form-label">Genre</label>
+                        <select id="genreId" name="genreId" class="form-select">
+                            <option value="">All Genres</option>
+                            @foreach (var genre in genres)
+                            {
+                                if (Context.Request.Query["genreId"] == genre.Id.ToString())
+                                {
+                                    <option value="@genre.Id" selected>@genre.Name</option>
+                                }
+                                else
+                                {
+                                    <option value="@genre.Id">@genre.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <div class="d-grid w-100">
+                            <input type="submit" class="btn btn-primary" value="Search" />
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Hidden inputs for maintaining page number if it exists -->
+                @if (!string.IsNullOrEmpty(Context.Request.Query["page"]))
+                {
+                    <input type="hidden" name="page" value="@Context.Request.Query["page"]" />
+                }
+                
+                @if(!string.IsNullOrEmpty(Context.Request.Query["name"]) || 
+                   !string.IsNullOrEmpty(Context.Request.Query["author"]) || 
+                   !string.IsNullOrEmpty(Context.Request.Query["description"]) ||
+                   !string.IsNullOrEmpty(Context.Request.Query["genreId"]))
+                {
+                    <div class="mt-2">
+                        <a asp-action="Books" class="btn btn-sm btn-outline-secondary">Clear filters</a>
+                    </div>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+<p>
+    <a asp-route="Books/Create" method="get">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Isbn)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Author)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Genre)
+            </th>
+            <th>Actions</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model) {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Isbn)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Author)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Genre.Name)
+                </td>
+                <td>
+                    <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@item.Id">Details</a>
+                </td>
+                <td>
+                    <a class="btn btn-secondary" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                </td>
+                <td>
+                    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="d-flex justify-content-between align-items-center">
+    <div>
+        <span>Showing page @currentPage of @totalPages</span>
+    </div>
+    <div>
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Books" asp-all-route-data="queryParams" asp-route-page="@(currentPage - 1)">Previous</a>
+                </li>
+                
+                @* First Page *@
+                <li class="page-item @(currentPage == 1 ? "active" : "")">
+                    <a class="page-link" asp-action="Books" asp-all-route-data="queryParams" asp-route-page="1">1</a>
+                </li>
+                
+                @* Show ellipsis if current page is not after first page *@
+                @if (currentPage > 2)
+                {
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                }
+                
+                @* Current page, if it's not first or last page *@
+                @if (currentPage != 1 && currentPage != totalPages)
+                {
+                    <li class="page-item active">
+                        <a class="page-link" asp-action="Books" asp-all-route-data="queryParams" asp-route-page="@currentPage">@currentPage</a>
+                    </li>
+                }
+                
+                @* Show ellipsis if current page is not before last page *@
+                @if (currentPage < totalPages - 1)
+                {
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                }
+                
+                @* Last Page (if there is more than one page) *@
+                @if (totalPages > 1)
+                {
+                    <li class="page-item @(currentPage == totalPages ? "active" : "")">
+                        <a class="page-link" asp-action="Books" asp-all-route-data="queryParams" asp-route-page="@totalPages">@totalPages</a>
+                    </li>
+                }
+                
+                <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                    <a class="page-link" asp-action="Books" asp-all-route-data="queryParams" asp-route-page="@(currentPage + 1)">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Add this script to prevent empty fields from being submitted
+        document.querySelector('form').addEventListener('submit', function(e) {
+            // Get all input and select elements
+            var elements = this.querySelectorAll('input:not([type="submit"]), select');
+            
+            // Temporarily disable empty fields before submission
+            elements.forEach(function(el) {
+                if (el.value === '' || el.value === null) {
+                    el.disabled = true;
+                }
+            });
+            
+            // Form will submit with only non-empty fields
+            // Fields are re-enabled after submission by the browser
+        });
+    </script>
+}

@@ -14,6 +14,6 @@ namespace WebApp.ViewModels
 
         public DateOnly? PublicationDate { get; set; }
 
-        public virtual Genre Genre { get; set; } = null!;
+        public Genre Genre { get; set; } = null!;
     }
 }

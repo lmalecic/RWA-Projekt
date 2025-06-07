@@ -129,7 +129,7 @@ namespace DAL.Services
                 .AsEnumerable();
         }
 
-        public SearchResult<BookDto> Search(BookSearchParams searchParams)
+        public SearchResult<Book> Search(BookSearchParams searchParams)
         {
             if (searchParams.Page < 1 || searchParams.Count < 1)
             {
@@ -137,7 +137,12 @@ namespace DAL.Services
                 throw new BadHttpRequestException("Page and count must be positive integers.");
             }
 
-            var query = _context.Books.AsQueryable();
+            var query = _context.Books
+                .Include(x => x.BookLocations)
+                .Include(x => x.UserReservations)
+                .Include(x => x.UserReviews)
+                .Include(x => x.Genre)
+                .AsQueryable();
 
             if (searchParams.GenreId != null)
                 query = query.Where(b => b.GenreId == searchParams.GenreId);
@@ -158,8 +163,7 @@ namespace DAL.Services
             var books = query
                 .Skip((searchParams.Page - 1) * searchParams.Count)
                 .Take(searchParams.Count)
-                .AsEnumerable()
-                .Select(_mapper.Map<BookDto>);
+                .AsEnumerable();
 
             _logService.Log($"Searched books (name: {searchParams.Name}, author: {searchParams.Author}, page: {searchParams.Page}, count: {searchParams.Count})", 0);
 
