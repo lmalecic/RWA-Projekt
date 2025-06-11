@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using DAL.Models;
 using DAL.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Reflection;
@@ -9,6 +10,7 @@ using WebApp.ViewModels;
 namespace WebApp.Controllers
 {
     [Route("[controller]")]
+    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private readonly BookService _bookService;

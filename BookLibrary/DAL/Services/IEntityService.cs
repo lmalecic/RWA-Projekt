@@ -1,5 +1,4 @@
-﻿using DAL.DTO;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +11,7 @@ namespace DAL.Services
         public bool Exists(int id);
         public T Get(int id);
         public T Create(T entity);
-        public T Update(int id, IUpdateDto updateDto);
+        public T Update(int id, T updateEntity);
         public T? Delete(int id);
 
         public IEnumerable<T> GetAll();

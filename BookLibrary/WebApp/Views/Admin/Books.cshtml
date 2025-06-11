@@ -1,11 +1,9 @@
-﻿@model IEnumerable<WebApp.ViewModels.BookViewModel>
-@inject DAL.Services.IEntityService<DAL.Models.Genre> GenreService
+﻿@model WebApp.ViewModels.BooksViewModel
 @using DAL.Models
 
 @{
     ViewData["Title"] = "Books";
-    var genres = GenreService.GetAll();
-    
+
     int currentPage = ViewBag.CurrentPage != null ? ViewBag.CurrentPage : 1;
     int totalPages = ViewBag.TotalPages != null ? ViewBag.TotalPages : 1;
     
@@ -19,7 +17,7 @@
     }
 }
 
-@await Html.PartialAsync("_EntityLayout");
+@await Html.PartialAsync("_EntityLayout")
 
 <h1>Books</h1>
 
@@ -44,7 +42,7 @@
                         <label for="genreId" class="form-label">Genre</label>
                         <select id="genreId" name="genreId" class="form-select">
                             <option value="">All Genres</option>
-                            @foreach (var genre in genres)
+                            @foreach (var genre in Model.Genres)
                             {
                                 if (Context.Request.Query["genreId"] == genre.Id.ToString())
                                 {
@@ -91,22 +89,22 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Id)
+                @Html.DisplayNameFor(model => model.Books.FirstOrDefault(new BookViewModel()).Id)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Isbn)
+                @Html.DisplayNameFor(model => model.Books.FirstOrDefault(new BookViewModel()).Isbn)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Name)
+                @Html.DisplayNameFor(model => model.Books.FirstOrDefault(new BookViewModel()).Name)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Author)
+                @Html.DisplayNameFor(model => model.Books.FirstOrDefault(new BookViewModel()).Author)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Description)
+                @Html.DisplayNameFor(model => model.Books.FirstOrDefault(new BookViewModel()).Description)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Genre)
+                @Html.DisplayNameFor(model => model.Books.FirstOrDefault(new BookViewModel()).Genre)
             </th>
             <th>Actions</th>
             <th></th>
@@ -114,7 +112,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model) {
+        @foreach (var item in Model.Books) {
             <tr>
                 <td>
                     @Html.DisplayFor(modelItem => item.Id)

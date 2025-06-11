@@ -61,7 +61,7 @@ namespace DAL.Services
                 .Include(x => x.UserReservations)
                 .Include(x => x.UserReviews)
                 .Include(x => x.Genre)
-                .FirstOrDefault(x => x.Id == id);
+                .First(x => x.Id == id);
 
             if (existing == null) {
                 _logService.Log($"Could not find book with id={id}", 1);
@@ -81,13 +81,14 @@ namespace DAL.Services
             return entity;
         }
 
-        public Book Update(int id, IUpdateDto updateDto)
+        public Book Update(Book book)
         {
-            var existing = this.Get(id);
+            var existing = this.Get(book.Id);
 
-            _mapper.Map(updateDto, existing);
+            _mapper.Map(book, existing);
             _context.SaveChanges();
-            _logService.Log($"Updated book with id={id}", 0);
+
+            _logService.Log($"Updated book with id={book.Id}", 0);
 
             return existing;
         }

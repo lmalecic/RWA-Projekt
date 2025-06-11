@@ -119,8 +119,9 @@ namespace WebAPI.Controllers
         public IActionResult Put(int id, [FromBody] BookUpdateDto updateDto)
         {
             try {
-                var book = _bookService.Update(id, updateDto);
-                var mapped = _mapper.Map<BookDto>(book);
+                var dbBook = _mapper.Map<Book>(updateDto);
+                var updatedBook = _bookService.Update(dbBook);
+                var mapped = _mapper.Map<BookDto>(updatedBook);
                 return Ok(mapped);
             }
             catch (FileNotFoundException ex) {
