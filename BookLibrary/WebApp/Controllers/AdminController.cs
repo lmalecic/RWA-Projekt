@@ -28,6 +28,7 @@ namespace WebApp.Controllers
             this._locationService = locationService;
         }
 
+        [HttpGet("")]
         [HttpGet("[action]")]
         public IActionResult Index()
         {
@@ -62,17 +63,7 @@ namespace WebApp.Controllers
             ViewBag.TotalItems = searchResult.Total;
             ViewBag.ItemsPerPage = searchResult.Count;
 
-            var method = MethodBase.GetCurrentMethod();
-            if (method == null)
-                return View("Error", Results.NotFound());
-
-            return View($"{method.Name}/Index", books);
-        }
-
-        [HttpGet("{entity}/[action]")]
-        public IActionResult Create(string entity)
-        {
-            return View($"{entity}/Create");
+            return View(nameof(Books), books);
         }
 
         [HttpGet("[action]")]

@@ -1,8 +1,9 @@
-﻿using DAL.Models;
+﻿using DAL.DTO;
+using DAL.Models;
 
 namespace WebApp.ViewModels
 {
-    public class BookCreateViewModel
+    public class BookCreateViewModel : IUpdateDto
     {
         public string Isbn { get; set; } = null!;
 
@@ -14,6 +15,6 @@ namespace WebApp.ViewModels
 
         public DateOnly? PublicationDate { get; set; }
 
-        public Genre Genre { get; set; } = null!;
+        public GenreViewModel Genre = null!;
     }
 }

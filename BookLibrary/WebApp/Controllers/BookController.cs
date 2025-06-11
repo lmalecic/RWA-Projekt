@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DAL.Models;
 using DAL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -58,9 +59,12 @@ namespace WebApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(BookCreateViewModel createViewModel)
         {
             try {
+                var book = _mapper.Map<Book>(createViewModel);
+                _bookService.Create(book);
+
                 return RedirectToAction(nameof(Index));
             }
             catch {
@@ -80,7 +84,6 @@ namespace WebApp.Controllers
             catch (FileNotFoundException ex) {
                 return NotFound();
             }
-            return View();
         }
 
         // POST: BooksController/Edit/5
