@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DAL.DTO
+namespace WebAPI.DTO
 {
-    public class LocationUpdateDto : IUpdateDto
+    public class LocationUpdateDto
     {
+        public int Id { get; set; }
+
         public string Name { get; set; } = null!;
     }
 }

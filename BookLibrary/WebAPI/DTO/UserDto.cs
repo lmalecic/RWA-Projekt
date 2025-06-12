@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DAL.DTO
+namespace WebAPI.DTO
 {
     public class UserDto
     {

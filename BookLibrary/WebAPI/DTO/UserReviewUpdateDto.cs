@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DAL.DTO
+namespace WebAPI.DTO
 {
-    public class UserReviewUpdateDto : IUpdateDto
+    public class UserReviewUpdateDto
     {
+        public int Id { get; set; }
+
         public int Rating { get; set; }
 
         public string? Text { get; set; }

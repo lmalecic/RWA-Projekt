@@ -1,11 +1,12 @@
-﻿using DAL.Models;
+﻿using DAL.Attributes;
+using DAL.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DAL.DTO
+namespace WebAPI.DTO
 {
     public class BookDto
     {
@@ -21,18 +22,7 @@ namespace DAL.DTO
 
         public DateOnly? PublicationDate { get; set; }
 
-        [Exists<Genre>(ErrorMessage = "Invalid genre id!")]
+        [Exists<Genre>]
         public int GenreId { get; set; }
-
-        public BookDto Clone() => new BookDto
-        {
-            Id = Id,
-            Isbn = Isbn,
-            Name = Name,
-            Author = Author,
-            Description = Description,
-            PublicationDate = PublicationDate,
-            GenreId = GenreId
-        };
     }
 }

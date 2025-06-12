@@ -8,17 +8,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace WebAPI.Controllers
 {
-    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class LogController : ControllerBase
     {
-        private readonly BookLibraryContext _context;
         private readonly LogService _logService;
 
-        public LogController(BookLibraryContext context, LogService logService)
+        public LogController(LogService logService)
         {
-            this._context = context;
             this._logService = logService;
         }
 

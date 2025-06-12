@@ -1,14 +1,10 @@
 ﻿using AutoMapper;
-using DAL.DTO;
 using DAL.Models;
 using DAL.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using System.ComponentModel.DataAnnotations;
+using WebAPI.DTO;
 
 namespace WebAPI.Controllers
 {
@@ -64,18 +60,10 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("[action]")]
-        public IActionResult Search(int count = 10, int page = 1, string? name = null, string? author = null, int? genreId = null, string? description = null)
+        public IActionResult Search(BookSearchParams searchParams)
         {
             try {
-                var result = _bookService.Search(new() {
-                    Count = count,
-                    Page = page,
-                    Name = name,
-                    Author = author,
-                    Description = description,
-                    GenreId = genreId
-                });
-
+                var result = _bookService.Search(searchParams);
                 var mappedResult = result.Results.Select(_mapper.Map<BookDto>);
                 return Ok(mappedResult);
             }
@@ -91,8 +79,8 @@ namespace WebAPI.Controllers
         }
 
         // POST api/<BookController>
-        [Authorize(Roles = "Admin")]
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult Post([FromBody] BookUpdateDto? bookUpdateDto)
         {
             if (bookUpdateDto == null) {
@@ -113,34 +101,39 @@ namespace WebAPI.Controllers
             }
         }
 
-        // PUT api/<BookController>/5
+        // PUT api/<BookController>
+        [HttpPut]
         [Authorize(Roles = "Admin")]
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] BookUpdateDto updateDto)
+        public IActionResult Put([FromBody] BookUpdateDto updateDto)
         {
+            if (!ModelState.IsValid) {
+                _logService.Log($"An error has occurred while updating book with id={updateDto.Id}.", 2);
+                return BadRequest(ModelState);
+            }
+
             try {
-                var dbBook = _mapper.Map<Book>(updateDto);
-                var updatedBook = _bookService.Update(dbBook);
-                var mapped = _mapper.Map<BookDto>(updatedBook);
+                var dbEntity = _mapper.Map<Book>(updateDto);
+                var updatedEntity = _bookService.Update(dbEntity);
+                var mapped = _mapper.Map<BookDto>(updatedEntity);
                 return Ok(mapped);
             }
             catch (FileNotFoundException ex) {
-                _logService.Log($"An error has occurred while updating book with id={id}.", 2);
+                _logService.Log($"An error has occurred while updating book with id={updateDto.Id}.", 2);
                 return NotFound(ex.Message);
             }
             catch (BadHttpRequestException ex) {
-                _logService.Log($"An error has occurred while updating book with id={id}.", 2);
+                _logService.Log($"An error has occurred while updating book with id={updateDto.Id}.", 2);
                 return BadRequest(ex.Message);
             }
             catch (Exception ex) {
-                _logService.Log($"An error has occurred while updating book with id={id}.", 3);
+                _logService.Log($"An error has occurred while updating book with id={updateDto.Id}.", 3);
                 return StatusCode(500, ex.Message);
             }
         }
 
         // DELETE api/<BookController>/5
-        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult Delete(int id)
         {
             try {

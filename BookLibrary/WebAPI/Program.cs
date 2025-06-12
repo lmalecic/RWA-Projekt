@@ -8,6 +8,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using WebAPI.AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,9 +23,13 @@ builder.Services.AddScoped<IAssociationService<BookLocation>, BookLocationServic
  
 builder.Services.AddDbContext<BookLibraryContext>(options => {
     options.UseSqlServer("name=ConnectionStrings:BookLibrary");
+    options.EnableSensitiveDataLogging();
 });
 
-builder.Services.AddAutoMapper(typeof(MappingProfile));
+builder.Services.AddAutoMapper(cfg => {
+    cfg.AddProfile<DbMappingProfile>();
+    cfg.AddProfile<DtoMappingProfile>();
+});
 
 // Add services to the container.
 builder.Services.AddControllers()

@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using DAL.DTO;
 using DAL.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,11 +24,8 @@ namespace DAL.Services
         public Genre Get(int id)
         {
             var entity = _context.Genres.FirstOrDefault(x => x.Id == id);
-            if (entity == null) {
-                throw new FileNotFoundException($"Genre with id {id} does not exist.");
-            }
-
-            return entity;
+            return entity != null ? entity
+                : throw new FileNotFoundException($"Genre with id {id} does not exist.");
         }
 
         public Genre Create(Genre entity)
@@ -40,18 +36,14 @@ namespace DAL.Services
             return entity;
         }
 
-        public Genre Update(int id, IUpdateDto updateDto)
+        public Genre Update(Genre entity)
         {
-            if (!this.Exists(id)) {
-                throw new FileNotFoundException($"Genre with id {id} does not exist.");
-            }
+            var existing = this.Get(entity.Id);
 
-            var entity = this.Get(id);
-
-            _mapper.Map(updateDto, entity);
+            _mapper.Map(entity, existing);
             _context.SaveChanges();
 
-            return entity;
+            return existing;
         }
 
         public Genre? Delete(int id)

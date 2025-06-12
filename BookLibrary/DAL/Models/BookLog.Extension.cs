@@ -13,15 +13,14 @@ namespace DAL.Models
             this.Timestamp = DateTime.UtcNow;
         }
 
-        public BookLog(string message, int level)
+        public BookLog(string message, int level) : this()
         {
             this.Message = message;
             this.Level = level;
-            this.Timestamp = DateTime.UtcNow;
         }
     }
 
-    public static partial class Extensions
+    public static partial class BookLogExtensions
     {
         public static IOrderedEnumerable<BookLog> Order(this IEnumerable<BookLog> logs)
         {

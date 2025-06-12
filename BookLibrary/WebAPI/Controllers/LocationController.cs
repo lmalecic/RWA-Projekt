@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
-using DAL.DTO;
 using DAL.Models;
 using DAL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.DTO;
 
 namespace WebAPI.Controllers
 {
@@ -55,14 +55,10 @@ namespace WebAPI.Controllers
         }
 
         // POST api/<LocationController>
-        [Authorize(Roles = "Admin")]
         [HttpPost]
-        public IActionResult Post([FromBody] LocationUpdateDto? updateDto)
+        [Authorize(Roles = "Admin")]
+        public IActionResult Post([FromBody] LocationUpdateDto updateDto)
         {
-            if (updateDto == null) {
-                return BadRequest("Location data is null.");
-            }
-
             try {
                 var entity = _locationService.Create(_mapper.Map<Location>(updateDto));
                 var mapped = _mapper.Map<LocationDto>(entity);
@@ -75,17 +71,21 @@ namespace WebAPI.Controllers
         }
 
         // PUT api/<LocationController>/5
+        [HttpPut]
         [Authorize(Roles = "Admin")]
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] LocationUpdateDto updateDto)
+        public IActionResult Put([FromBody] LocationUpdateDto updateDto)
         {
             try {
-                var existing = _locationService.Update(id, updateDto);
-                var mapped = _mapper.Map<LocationDto>(existing);
+                var dbEntity = _mapper.Map<Location>(updateDto);
+                var updatedEntity = _locationService.Update(dbEntity);
+                var mapped = _mapper.Map<LocationDto>(updatedEntity);
                 return Ok(mapped);
             }
-            catch (FileNotFoundException ex) { 
+            catch (FileNotFoundException ex) {
                 return NotFound(ex.Message);
+            }
+            catch (BadHttpRequestException ex) {
+                return BadRequest(ex.Message);
             }
             catch (Exception ex) {
                 return StatusCode(500, ex.Message);
@@ -93,8 +93,8 @@ namespace WebAPI.Controllers
         }
 
         // DELETE api/<LocationController>/5
-        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult Delete(int id)
         {
             try {

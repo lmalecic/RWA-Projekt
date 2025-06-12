@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Azure;
-using DAL.DTO;
 using DAL.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -15,32 +14,6 @@ using System.Threading.Tasks;
 
 namespace DAL.Services
 {
-    public struct BookSearchParams()
-    {
-        public int Count = 10;
-        public int Page = 1;
-        public string? Name;
-        public string? Author;
-        public string? Description;
-        public int? GenreId;
-    }
-
-    public class SearchResult<T>
-    {
-        public int Count;
-        public int Page;
-        public int Total;
-        public IEnumerable<T> Results;
-
-        public SearchResult(int count, int page, int total, IEnumerable<T> results)
-        {
-            this.Count = count;
-            this.Page = page;
-            this.Total = total;
-            this.Results = results;
-        }
-    }
-
     public class BookService : IEntityService<Book>
     {
         private readonly BookLibraryContext _context;
@@ -130,9 +103,9 @@ namespace DAL.Services
                 .AsEnumerable();
         }
 
-        public SearchResult<Book> Search(BookSearchParams searchParams)
+        public SearchResult<Book> Search(BookSearchParams searchModel)
         {
-            if (searchParams.Page < 1 || searchParams.Count < 1)
+            if (searchModel.Page < 1 || searchModel.Count < 1)
             {
                 _logService.Log($"Could not search books; page and count must be positive integers.", 1);
                 throw new BadHttpRequestException("Page and count must be positive integers.");
@@ -145,30 +118,30 @@ namespace DAL.Services
                 .Include(x => x.Genre)
                 .AsQueryable();
 
-            if (searchParams.GenreId != null)
-                query = query.Where(b => b.GenreId == searchParams.GenreId);
+            if (searchModel.GenreId != null)
+                query = query.Where(b => b.GenreId == searchModel.GenreId);
 
-            if (!string.IsNullOrWhiteSpace(searchParams.Name))
-                query = query.Where(b => b.Name.Contains(searchParams.Name));
+            if (!string.IsNullOrWhiteSpace(searchModel.Name))
+                query = query.Where(b => b.Name.Contains(searchModel.Name));
 
-            if (!string.IsNullOrWhiteSpace(searchParams.Author))
-                query = query.Where(b => b.Author.Contains(searchParams.Author));
+            if (!string.IsNullOrWhiteSpace(searchModel.Author))
+                query = query.Where(b => b.Author.Contains(searchModel.Author));
 
-            if (!string.IsNullOrWhiteSpace(searchParams.Description))
+            if (!string.IsNullOrWhiteSpace(searchModel.Description))
                 query = query.Where(b => b.Description != null ?
-                    b.Description.Contains(searchParams.Description) :
+                    b.Description.Contains(searchModel.Description) :
                     false);
 
             var total = query.Count();
 
             var books = query
-                .Skip((searchParams.Page - 1) * searchParams.Count)
-                .Take(searchParams.Count)
+                .Skip((searchModel.Page - 1) * searchModel.Count)
+                .Take(searchModel.Count)
                 .AsEnumerable();
 
-            _logService.Log($"Searched books (name: {searchParams.Name}, author: {searchParams.Author}, page: {searchParams.Page}, count: {searchParams.Count})", 0);
+            _logService.Log($"Searched books (name: {searchModel.Name}, author: {searchModel.Author}, page: {searchModel.Page}, count: {searchModel.Count})", 0);
 
-            return new (searchParams.Count, searchParams.Page, total, books);
+            return new (searchModel.Count, searchModel.Page, total, books);
         }
 
         public bool Exists(int id)

@@ -11,7 +11,7 @@ namespace DAL.Services
         public bool Exists(int id);
         public T Get(int id);
         public T Create(T entity);
-        public T Update(int id, T updateEntity);
+        public T Update(T entity);
         public T? Delete(int id);
 
         public IEnumerable<T> GetAll();

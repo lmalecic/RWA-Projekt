@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using DAL.DTO;
 using DAL.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -66,17 +66,14 @@ namespace DAL.Services
                 .AsEnumerable();
         }
 
-        public UserReview Update(int id, IUpdateDto updateDto)
+        public UserReview Update(UserReview entity)
         {
-            if (!this.Exists(id))
-                throw new FileNotFoundException($"Review with id={id} not found.");
+            var existing = this.Get(entity.Id);
 
-            var review = this.Get(id);
-
-            _mapper.Map(updateDto, review);
+            _mapper.Map(entity, existing);
             _context.SaveChanges();
 
-            return review;
+            return existing;
         }
     }
 }

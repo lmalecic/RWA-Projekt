@@ -1,17 +1,16 @@
 ﻿using AutoMapper;
-using DAL.DTO;
 using DAL.Models;
 using DAL.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
+
+using WebAPI.DTO;
 
 namespace WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     public class BookLocationController : ControllerBase
     {
         private readonly IMapper _mapper;
@@ -34,29 +33,31 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post(int bookId, int locationId)
+        public IActionResult Post([FromQuery] BookLocationDto entityDto)
         {
             try {
-                var result = _bookLocationService.Create(bookId, locationId);
+                var dbEntity = _mapper.Map<BookLocation>(entityDto);
+                var result = _bookLocationService.Create(dbEntity);
                 var mapped = _mapper.Map<BookLocationDto>(result);
                 return Ok(mapped);
             }
             catch (Exception ex) {
-                _logService.Log($"An error has occurred while associating bookId {bookId} with locationId {locationId}.", 2);
+                _logService.Log($"An error has occurred while associating bookId {entityDto.BookId} with locationId {entityDto.LocationId}.", 2);
                 return StatusCode(500, ex.Message);
             }
         }
 
         [HttpDelete]
-        public IActionResult Delete(int id1, int id2)
+        public IActionResult Delete([FromQuery] BookLocationDto entityDto)
         {
             try {
-                var result = _bookLocationService.Delete(id1, id2);
+                var dbEntity = _mapper.Map<BookLocation>(entityDto);
+                var result = _bookLocationService.Delete(dbEntity);
                 var mapped = _mapper.Map<BookLocationDto>(result);
                 return Ok(mapped);
             }
             catch (Exception ex) {
-                _logService.Log($"An error has occurred while de-associating bookId {id1} with locationId {id2}.", 2);
+                _logService.Log($"An error has occurred while de-associating bookId {entityDto.BookId} with locationId {entityDto.LocationId}.", 2);
                 return StatusCode(500, ex.Message);
             }
         }

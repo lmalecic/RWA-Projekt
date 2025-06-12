@@ -1,17 +1,16 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
-using DAL.DTO;
 using DAL.Models;
 using DAL.Services;
-using System;
-using System.IO;
-using System.Linq;
+using WebAPI.DTO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UserReservationController : ControllerBase
     {
         private readonly IEntityService<UserReservation> _reservationService;
@@ -88,26 +87,23 @@ namespace WebAPI.Controllers
             }
         }
 
-        // PUT: api/UserReservation/5
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] UserReservationUpdateDto updateDto)
+        // PUT: api/UserReservation
+        [HttpPut]
+        public IActionResult Put([FromBody] UserReservationUpdateDto updateDto)
         {
-            try
-            {
-                var updated = _reservationService.Update(id, updateDto);
-                var dto = _mapper.Map<UserReservationDto>(updated);
-                return Ok(dto);
+            try {
+                var dbEntity = _mapper.Map<UserReservation>(updateDto);
+                var updatedEntity = _reservationService.Update(dbEntity);
+                var mapped = _mapper.Map<UserReservationDto>(updatedEntity);
+                return Ok(mapped);
             }
-            catch (FileNotFoundException ex)
-            {
+            catch (FileNotFoundException ex) {
                 return NotFound(ex.Message);
             }
-            catch (BadHttpRequestException ex)
-            {
+            catch (BadHttpRequestException ex) {
                 return BadRequest(ex.Message);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 return StatusCode(500, ex.Message);
             }
         }

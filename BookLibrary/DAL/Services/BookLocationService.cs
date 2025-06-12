@@ -32,41 +32,35 @@ namespace DAL.Services
                 .AsEnumerable();
         }
 
-        public BookLocation Create(int id1, int id2)
+        public BookLocation Create(BookLocation entity)
         {
-            var book = _bookService.Get(id1);
-            var location = _locationService.Get(id2);
+            if (!_bookService.Exists(entity.BookId) || !_locationService.Exists(entity.LocationId))
+                throw new BadHttpRequestException($"Book with id {entity.BookId} or Location with id {entity.LocationId} does not exist.");
 
-            var assocation = new BookLocation
-            {
-                BookId = book.Id,
-                LocationId = location.Id
-            };
-
-            _context.BookLocations.Add(assocation);
+            _context.BookLocations.Add(entity);
             _context.SaveChanges();
 
-            _logService.Log($"Book with id {id1} was added to location with id {id2}.", 0);
-            return assocation;
+            _logService.Log($"Book with id {entity.BookId} was added to location with id {entity.LocationId}.", 0);
+            return entity;
         }
 
-        public BookLocation? Delete(int id1, int id2)
+        public BookLocation? Delete(BookLocation entity)
         {
-            if (!this.Exists(id1, id2)) {
+            if (!this.Exists(entity)) {
                 return null;
             }
 
-            var association = _context.BookLocations.First(x => x.BookId == id1 && x.LocationId == id2);
+            var association = _context.BookLocations.First(x => x.BookId == entity.BookId && x.LocationId == entity.LocationId);
             _context.BookLocations.Remove(association);
             _context.SaveChanges();
 
-            _logService.Log($"Book with id {id1} was removed from location with id {id2}.", 0);
+            _logService.Log($"Book with id {entity.BookId} was removed from location with id {entity.LocationId}.", 0);
             return association;
         }
 
-        public bool Exists(int id1, int id2)
+        public bool Exists(BookLocation entity)
         {
-            return _context.BookLocations.Any(x => x.BookId == id1 && x.LocationId == id2);
+            return _context.BookLocations.Any(x => x.BookId == entity.BookId && x.LocationId == entity.LocationId);
         }
     }
 }

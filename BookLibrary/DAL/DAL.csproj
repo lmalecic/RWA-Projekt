@@ -7,8 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Helpers\**" />
     <Compile Remove="ViewModels\**" />
+    <EmbeddedResource Remove="Helpers\**" />
     <EmbeddedResource Remove="ViewModels\**" />
+    <None Remove="Helpers\**" />
     <None Remove="ViewModels\**" />
   </ItemGroup>
 
@@ -23,10 +26,6 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Helpers\" />
   </ItemGroup>
 
 </Project>

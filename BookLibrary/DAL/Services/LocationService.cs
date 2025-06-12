@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using DAL.DTO;
 using DAL.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -42,14 +41,14 @@ namespace DAL.Services
             return entity;
         }
 
-        public Location Update(int id, IUpdateDto updateDto)
+        public Location Update(Location entity)
         {
-            var entity = this.Get(id);
+            var existing = this.Get(entity.Id);
 
-            _mapper.Map(updateDto, entity);
+            _mapper.Map(entity, existing);
             _context.SaveChanges();
 
-            return entity;
+            return existing;
         }
 
         public Location? Delete(int id)

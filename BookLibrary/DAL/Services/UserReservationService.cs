@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using DAL.DTO;
 using DAL.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -68,17 +67,14 @@ namespace DAL.Services
                 .ToList();
         }
 
-        public UserReservation Update(int id, IUpdateDto updateDto)
+        public UserReservation Update(UserReservation entity)
         {
-            if (!this.Exists(id))
-                throw new FileNotFoundException($"Reservation with id={id} not found.");
+            var existing = this.Get(entity.Id);
 
-            var reservation = this.Get(id);
-
-            _mapper.Map(updateDto, reservation);
+            _mapper.Map(entity, existing);
             _context.SaveChanges();
 
-            return reservation;
+            return existing;
         }
     }
 }

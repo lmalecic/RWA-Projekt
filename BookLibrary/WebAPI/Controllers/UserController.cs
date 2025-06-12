@@ -1,12 +1,10 @@
 ﻿using AutoMapper;
-using DAL.DTO;
 using DAL.Models;
 using DAL.Security;
 using Isopoh.Cryptography.Argon2;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.DTO;
 
 namespace WebAPI.Controllers
 {
@@ -34,23 +32,6 @@ namespace WebAPI.Controllers
                 NotFound($"User with id {id} not found.");
 
             return Ok(user);
-        }
-
-        [HttpGet("[action]")]
-        public IActionResult GetToken()
-        {
-            try {
-                string? secureKey = _configuration["JWT:SecureKey"];
-                if (secureKey == null)
-                    throw new Exception("JWT SecureKey is not set in appsettings.json!");
-
-                var serializedToken = JwtTokenProvider.CreateToken(secureKey, 10);
-
-                return Ok(serializedToken);
-            }
-            catch (Exception ex) {
-                return StatusCode(500, ex.Message);
-            }
         }
 
         [HttpPost("[action]")]
@@ -83,7 +64,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("[action]")]
-        public IActionResult Login(UserLoginDto userDto)
+        public IActionResult Login([FromBody] UserLoginDto userDto)
         {
             try {
                 var genericLoginFail = "Incorrect username or password";

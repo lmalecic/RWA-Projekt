@@ -1,9 +1,6 @@
-﻿using DAL.DTO;
-using DAL.Models;
-
-namespace WebApp.ViewModels
+﻿namespace WebApp.ViewModels
 {
-    public class BookCreateViewModel : IUpdateDto
+    public class BookCreateViewModel
     {
         public string Isbn { get; set; } = null!;
 

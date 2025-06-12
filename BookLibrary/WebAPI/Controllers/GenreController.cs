@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
-using DAL.DTO;
 using DAL.Models;
 using DAL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using WebAPI.DTO;
 
 namespace WebAPI.Controllers
 {
@@ -56,8 +56,8 @@ namespace WebAPI.Controllers
         }
 
         // POST api/<GenreController>
-        [Authorize(Roles = "Admin")]
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult Post([FromBody] GenreUpdateDto? updateDto)
         {
             if (updateDto == null) {
@@ -77,16 +77,21 @@ namespace WebAPI.Controllers
         }
 
         // PUT api/<GenreController>/5
+        [HttpPut]
         [Authorize(Roles = "Admin")]
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] GenreUpdateDto genreUpdateDto)
+        public IActionResult Put([FromBody] GenreUpdateDto updateDto)
         {
             try {
-                var existingGenre = _genreService.Update(id, genreUpdateDto);
-                return Ok(_mapper.Map<GenreDto>(existingGenre));
+                var dbEntity = _mapper.Map<Genre>(updateDto);
+                var updatedBook = _genreService.Update(dbEntity);
+                var mapped = _mapper.Map<GenreDto>(updatedBook);
+                return Ok(mapped);
             }
             catch (FileNotFoundException ex) {
                 return NotFound(ex.Message);
+            }
+            catch (BadHttpRequestException ex) {
+                return BadRequest(ex.Message);
             }
             catch (Exception ex) {
                 return StatusCode(500, ex.Message);
@@ -94,8 +99,8 @@ namespace WebAPI.Controllers
         }
 
         // DELETE api/<GenreController>/5
-        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult Delete(int id)
         {
             try {

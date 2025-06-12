@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DAL.DTO
+namespace WebAPI.DTO
 {
-    public class UserReservationUpdateDto : IUpdateDto
+    public class UserReservationUpdateDto
     {
+        public int Id { get; set; }
+
         public int Status { get; set; }
 
         public DateTime? Date { get; set; }
