@@ -1,22 +1,21 @@
 ﻿@{
-    var currentAction = ViewContext.RouteData.Values["entity"]?.ToString() ?? 
-                        ViewContext.RouteData.Values["action"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
 }
 
 <nav class="w-100 d-flex gap-2 justify-content-center">
-    <a asp-controller="Admin" asp-action="Entity" asp-route-entity="Books"
+    <a asp-controller="Admin" asp-action="Books"
        class="nav-item btn @(currentAction == "Books" || currentAction == "Index" ? "btn-primary" : "btn-outline-primary")">
         Books
     </a>
-    <a asp-controller="Admin" asp-action="Entity" asp-route-entity="Genres"
+    <a asp-controller="Admin" asp-action="Genres"
        class="nav-item btn @(currentAction == "Genres" ? "btn-primary" : "btn-outline-primary")">
         Genres
     </a>
-    <a asp-controller="Admin" asp-action="Entity" asp-route-entity="Locations"
+    <a asp-controller="Admin" asp-action="Locations"
        class="nav-item btn @(currentAction == "Locations" ? "btn-primary" : "btn-outline-primary")">
         Locations
     </a>
-    <a asp-controller="Admin" asp-action="Entity" asp-route-entity="Users"
+    <a asp-controller="Admin" asp-action="Users"
        class="nav-item btn @(currentAction == "Users" ? "btn-primary" : "btn-outline-primary")">
         Users
     </a>

@@ -64,7 +64,7 @@ namespace WebAPI.Controllers
         {
             try {
                 var result = _bookService.Search(searchParams);
-                var mappedResult = result.Results.Select(_mapper.Map<BookDto>);
+                var mappedResult = result.Items.Select(_mapper.Map<BookDto>);
                 return Ok(mappedResult);
             }
             catch (BadHttpRequestException ex)

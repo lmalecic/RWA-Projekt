@@ -22,8 +22,9 @@ namespace WebApp.ViewModels
         public DateOnly? PublicationDate { get; set; }
 
         [Display(Name = "Genre")]
-        public virtual Genre Genre { get; set; } = null!;
+        public GenreViewModel Genre { get; set; } = null!;
 
-        public virtual ICollection<BookLocation> BookLocations { get; set; } = new List<BookLocation>();
+        //[Display(Name = "Locations")]
+        //public ICollection<BookLocation> BookLocations { get; set; } = new List<BookLocation>();
     }
 }

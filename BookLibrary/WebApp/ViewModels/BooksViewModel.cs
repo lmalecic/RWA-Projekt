@@ -1,8 +1,10 @@
-﻿namespace WebApp.ViewModels
+﻿using DAL.Services;
+
+namespace WebApp.ViewModels
 {
     public class BooksViewModel
     {
-        public IEnumerable<BookViewModel> Books { get; set; }
-        public IEnumerable<GenreViewModel> Genres { get; set; }
+        public SearchResult<BookViewModel> SearchResult { get; set; } = null!;
+        public IEnumerable<GenreViewModel> Genres { get; set; } = null!;
     }
 }

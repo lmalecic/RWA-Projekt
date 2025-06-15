@@ -133,6 +133,7 @@ namespace DAL.Services
                     false);
 
             var total = query.Count();
+            var totalPages = (int)Math.Ceiling((double)total / searchModel.Count);
 
             var books = query
                 .Skip((searchModel.Page - 1) * searchModel.Count)
@@ -141,7 +142,7 @@ namespace DAL.Services
 
             _logService.Log($"Searched books (name: {searchModel.Name}, author: {searchModel.Author}, page: {searchModel.Page}, count: {searchModel.Count})", 0);
 
-            return new (searchModel.Count, searchModel.Page, total, books);
+            return new SearchResult<Book>(searchModel.Count, searchModel.Page, totalPages, books);
         }
 
         public bool Exists(int id)

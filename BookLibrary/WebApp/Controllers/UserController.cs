@@ -1,6 +1,5 @@
 ﻿using AspNetCoreGeneratedDocument;
 using AutoMapper;
-using DAL.DTO;
 using DAL.Models;
 using Isopoh.Cryptography.Argon2;
 using Microsoft.AspNetCore.Authentication;
@@ -111,14 +110,10 @@ namespace WebApp.Controllers
             }
 
             var claims = new List<Claim>() {
-                new Claim(ClaimTypes.Name, loginViewModel.Username),
-                new Claim(ClaimTypes.Role, existingUser.Role)
+                new(ClaimTypes.Name, loginViewModel.Username),
+                new(ClaimTypes.Role, existingUser.Role)
             };
-
-            var claimsIdentity = new ClaimsIdentity(
-                claims,
-                CookieAuthenticationDefaults.AuthenticationScheme);
-
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var authProperties = new AuthenticationProperties();
 
             await HttpContext.SignInAsync(

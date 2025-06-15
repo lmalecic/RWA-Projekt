@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DAL.Services;
 
 namespace WebApp.AutoMapper
 {
@@ -20,6 +21,12 @@ namespace WebApp.AutoMapper
             CreateMap<DAL.Models.User, ViewModels.UserViewModel>();
             CreateMap<ViewModels.UserViewModel, DAL.Models.User>()
                 .ForMember(x => x.Id, opt => opt.Ignore());
+
+            CreateMap<SearchResult<DAL.Models.Book>, SearchResult<ViewModels.BookViewModel>>()
+                .ForMember(dest => dest.Count, opt => opt.MapFrom(src => src.Count))
+                .ForMember(dest => dest.Page, opt => opt.MapFrom(src => src.Page))
+                .ForMember(dest => dest.TotalPages, opt => opt.MapFrom(src => src.TotalPages))
+                .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
         }
     }
 }

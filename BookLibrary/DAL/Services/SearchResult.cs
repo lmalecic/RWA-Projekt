@@ -2,17 +2,21 @@
 {
     public class SearchResult<T>
     {
-        public int Count;
-        public int Page;
-        public int Total;
-        public IEnumerable<T> Results;
+        public int Count { get; set; }
+        public int Page { get; set; }
+        public int TotalPages { get; set; }
+        public IEnumerable<T> Items { get; set; }
 
-        public SearchResult(int count, int page, int total, IEnumerable<T> results)
+        public SearchResult()
+        {
+        }
+
+        public SearchResult(int count, int page, int total, IEnumerable<T> items)
         {
             this.Count = count;
             this.Page = page;
-            this.Total = total;
-            this.Results = results;
+            this.TotalPages = total;
+            this.Items = items;
         }
     }
 }

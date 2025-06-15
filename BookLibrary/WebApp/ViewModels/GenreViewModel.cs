@@ -12,6 +12,6 @@ namespace WebApp.ViewModels
         public string Name { get; set; } = null!;
 
         [Display(Name = "Books related to this genre")]
-        public virtual ICollection<Book> Books { get; set; } = new List<Book>();
+        public ICollection<BookViewModel> Books { get; set; } = new List<BookViewModel>();
     }
 }

@@ -30,7 +30,6 @@ namespace WebApp.Controllers
             this._locationService = locationService;
         }
 
-        [HttpGet("")]
         [HttpGet("[action]")]
         public IActionResult Index()
         {
@@ -38,34 +37,19 @@ namespace WebApp.Controllers
         }
 
         [HttpGet("[action]")]
-        public IActionResult Books(string? name, string? author, string? description, int? genreId, int page = 1, int count = 10)
+        public IActionResult Books([FromQuery] BookSearchParams searchParams)
         {
-            var searchParams = new BookSearchParams() {
-                Count = count,
-                Page = page
-            };
-            
-            if (!string.IsNullOrWhiteSpace(name))
-                searchParams.Name = name;
-                
-            if (!string.IsNullOrWhiteSpace(author))
-                searchParams.Author = author;
-                
-            if (!string.IsNullOrWhiteSpace(description))
-                searchParams.Description = description;
-                
-            if (genreId.HasValue)
-                searchParams.GenreId = genreId;
+            if (!ModelState.IsValid) {
+                return BadRequest(ModelState);
+            }
             
             var searchResult = _bookService.Search(searchParams);
-            var books = _mapper.Map<IEnumerable<BookViewModel>>(searchResult.Results);
-            
-            ViewBag.CurrentPage = searchResult.Page;
-            ViewBag.TotalPages = (int)Math.Ceiling((double)searchResult.Total / searchResult.Count);
-            ViewBag.TotalItems = searchResult.Total;
-            ViewBag.ItemsPerPage = searchResult.Count;
+            var mapped = _mapper.Map<SearchResult<BookViewModel>>(searchResult);
 
-            return View(nameof(Books), books);
+            return View(new BooksViewModel {
+                SearchResult = mapped,
+                Genres = _genreService.GetAll().Select(_mapper.Map<GenreViewModel>)
+            });
         }
 
         [HttpGet("[action]")]
