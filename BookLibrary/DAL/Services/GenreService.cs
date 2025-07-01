@@ -2,6 +2,7 @@
 using DAL.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -66,7 +67,8 @@ namespace DAL.Services
 
         public IEnumerable<Genre> GetAll()
         {
-            return _context.Genres.AsEnumerable();
+            return _context.Genres
+                .AsEnumerable();
         }
 
         public bool Exists(int id)

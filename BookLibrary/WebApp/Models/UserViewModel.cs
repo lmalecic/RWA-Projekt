@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
-namespace WebApp.ViewModels
+namespace WebApp.Models
 {
     public class UserViewModel
     {

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Reflection;
-using WebApp.ViewModels;
+using WebApp.Models;
 
 namespace WebApp.Controllers
 {
@@ -55,21 +55,21 @@ namespace WebApp.Controllers
         [HttpGet("[action]")]
         public IActionResult Genres()
         {
-            var dbGenres = _genreService.GetAll();
-            var genres = _mapper.Map<IEnumerable<GenreViewModel>>(dbGenres);
-
-            return View();
+            var genres = _genreService.GetAll().Select(_mapper.Map<GenreViewModel>);
+            return View(genres);
         }
 
         [HttpGet("[action]")]
         public IActionResult Locations()
         {
+            //var locations = _locationService.GetAll().Select(_mapper.Map<LocationViewModel>);
             return View();
         }
 
         [HttpGet("[action]")]
         public IActionResult Users()
         {
+            //var users = _userService.GetAll().Select(_mapper.Map<UserViewModel>);
             return View();
         }
     }

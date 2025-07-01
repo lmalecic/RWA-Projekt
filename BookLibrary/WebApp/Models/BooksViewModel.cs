@@ -1,6 +1,6 @@
 ﻿using DAL.Services;
 
-namespace WebApp.ViewModels
+namespace WebApp.Models
 {
     public class BooksViewModel
     {

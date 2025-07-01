@@ -5,22 +5,25 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Runtime.InteropServices;
-using WebApp.ViewModels;
+using WebApp.Models;
 
 namespace WebApp.Controllers
 {
     public class BookController : Controller
     {
         private readonly BookService _bookService;
+        private readonly IEntityService<Genre> _genreService;
         private readonly IMapper _mapper;
 
-        public BookController(BookService bookService, IMapper mapper)
+        public BookController(BookService bookService, IMapper mapper, IEntityService<Genre> genreService)
         {
             this._bookService = bookService;
             this._mapper = mapper;
+            this._genreService = genreService;
         }
 
         // GET: BooksController
+        // Non-admin view of books
         public ActionResult Index()
         {
             var dbBooks = _bookService.GetAll();
@@ -30,29 +33,38 @@ namespace WebApp.Controllers
         }
 
         // GET: BooksController/Details/5
-        public ActionResult Details(int id)
+        // View of book details (both admin and non-admin)
+        public ActionResult Details(int id, string? returnUrl)
         {
             try {
                 var dbBook = _bookService.Get(id);
-                if (dbBook == null) {
-                    return NotFound();
-                }
                 var book = _mapper.Map<BookViewModel>(dbBook);
-                return View(book);
+
+                return View(new BookDetailsViewModel {
+                    Book = book,
+                    ReturnUrl = returnUrl
+                });
             }
             catch (FileNotFoundException ex) {
                 return NotFound(ex.Message);
             }
-            catch (Exception ex) {
+            catch (Exception) {
                 return StatusCode(500, "Internal server error");
             }
         }
 
         // GET: BooksController/Create
+        [HttpGet]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public ActionResult Create()
+        public ActionResult Create(string? returnUrl)
         {
-            return View();
+            var model = new BookCreateViewModel {
+                Book = new BookViewModel(),
+                ExistingGenres = _genreService.GetAll().Select(_mapper.Map<GenreViewModel>),
+            };
+
+            return View(model);
         }
 
         // POST: BooksController/Create
@@ -62,13 +74,14 @@ namespace WebApp.Controllers
         public ActionResult Create(BookCreateViewModel createViewModel)
         {
             try {
-                var book = _mapper.Map<Book>(createViewModel);
+                var book = _mapper.Map<Book>(createViewModel.Book);
                 _bookService.Create(book);
 
-                return RedirectToAction(nameof(Index));
+                var mapped = _mapper.Map<BookViewModel>(book);
+                return RedirectToAction(nameof(Details), new { id = mapped.Id, returnUrl = $"Admin/{nameof(AdminController.Books)}" });
             }
-            catch {
-                return View();
+            catch (Exception) {
+                return StatusCode(500, "Internal server error");
             }
         }
 
@@ -79,10 +92,16 @@ namespace WebApp.Controllers
             try {
                 var dbBook = _bookService.Get(id);
                 var book = _mapper.Map<BookViewModel>(dbBook);
-                return View(book);
+                return View(new BookEditViewModel {
+                    Book = book,
+                    ExistingGenres = _genreService.GetAll().Select(_mapper.Map<GenreViewModel>)
+                });
             }
             catch (FileNotFoundException ex) {
                 return NotFound();
+            }
+            catch (Exception ex) {
+                return StatusCode(500, "Internal server error");
             }
         }
 
@@ -90,28 +109,37 @@ namespace WebApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(BookEditViewModel editViewModel)
         {
-            try {
-                return RedirectToAction(nameof(Index));
+            if (!ModelState.IsValid) {
+                return View(editViewModel);
             }
-            catch {
-                return View();
+
+            try {
+                var book = _mapper.Map<Book>(editViewModel);
+                _bookService.Update(book);
+
+                return RedirectToAction(nameof(Details), new { id = book.Id, returnUrl = editViewModel.ReturnUrl });
+            }
+            catch (FileNotFoundException ex) {
+                return NotFound();
+            }
+            catch (Exception) {
+                return StatusCode(500, "Internal server error");
             }
         }
 
         // GET: BooksController/Delete/5
+        [HttpGet]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
         public ActionResult Delete(int id)
         {
             try {
                 var dbBook = _bookService.Get(id);
-                if (dbBook == null) {
-                    return NotFound();
-                }
-
                 var book = _mapper.Map<BookViewModel>(dbBook);
-                return RedirectToAction("Index", "Book");
+
+                return View(book);
             }
             catch (FileNotFoundException ex) {
                 return NotFound(ex.Message);
@@ -125,17 +153,19 @@ namespace WebApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(BookDeleteViewModel deleteViewModel)
         {
             try {
-                _bookService.Delete(id);
-                return RedirectToAction(nameof(Index));
+                _bookService.Delete(deleteViewModel.Book.Id);
+                return deleteViewModel.ReturnUrl != null ?
+                    Redirect(deleteViewModel.ReturnUrl) :
+                    RedirectToAction(nameof(Index));
             }
             catch (BadHttpRequestException ex) {
                 return BadRequest(ex.Message);
             }
-            catch {
-                return View();
+            catch (Exception ex) {
+                return StatusCode(500, "Internal server error");
             }
         }
     }

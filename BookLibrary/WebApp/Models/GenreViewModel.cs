@@ -1,7 +1,7 @@
 ﻿using DAL.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace WebApp.ViewModels
+namespace WebApp.Models
 {
     public class GenreViewModel
     {
@@ -11,7 +11,8 @@ namespace WebApp.ViewModels
         [Display(Name = "Genre name")]
         public string Name { get; set; } = null!;
 
-        [Display(Name = "Books related to this genre")]
-        public ICollection<BookViewModel> Books { get; set; } = new List<BookViewModel>();
+        public GenreViewModel()
+        {
+        }
     }
 }

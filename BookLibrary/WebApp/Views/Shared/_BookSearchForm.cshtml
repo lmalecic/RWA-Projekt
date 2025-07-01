@@ -1,0 +1,59 @@
+﻿<div class="row mb-4">
+    <div class="col-md-12">
+        <form asp-action="Books" method="get" class="card shadow-sm">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-2">
+                        <label for="name" class="form-label">Title</label>
+                        <input type="text" id="name" name="name" class="form-control" placeholder="Book title" value="@Context.Request.Query["name"]">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="author" class="form-label">Author</label>
+                        <input type="text" id="author" name="author" class="form-control" placeholder="Author name" value="@Context.Request.Query["author"]">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="description" class="form-label">Description</label>
+                        <input type="text" id="description" name="description" class="form-control" placeholder="Keywords" value="@Context.Request.Query["description"]">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="genreId" class="form-label">Genre</label>
+                        <select id="genreId" name="genreId" class="form-select">
+                            <option value="">All Genres</option>
+                            @foreach (var genre in Model.Genres)
+                            {
+                                if (Context.Request.Query["genreId"] == genre.Id.ToString())
+                                {
+                                    <option value="@genre.Id" selected>@genre.Name</option>
+                                }
+                                else
+                                {
+                                    <option value="@genre.Id">@genre.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <div class="d-grid w-100">
+                            <input type="submit" class="btn btn-primary" value="Search" />
+                        </div>
+                    </div>
+                </div>
+                
+                @if (!string.IsNullOrEmpty(Context.Request.Query["page"]))
+                {
+                    <input type="hidden" name="page" value="@Context.Request.Query["page"]" />
+                }
+                
+                @if(!string.IsNullOrEmpty(Context.Request.Query["name"]) || 
+                   !string.IsNullOrEmpty(Context.Request.Query["author"]) || 
+                   !string.IsNullOrEmpty(Context.Request.Query["description"]) ||
+                   !string.IsNullOrEmpty(Context.Request.Query["genreId"]))
+                {
+                    <div class="mt-2">
+                        <a asp-action="Books" class="btn btn-sm btn-outline-secondary">Clear filters</a>
+                    </div>
+                }
+            </div>
+        </form>
+    </div>
+</div>

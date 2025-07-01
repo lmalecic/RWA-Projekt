@@ -1,0 +1,36 @@
+﻿@model IEnumerable<WebApp.Models.GenreViewModel>
+@using DAL.Models
+
+@{
+    ViewData["Title"] = "Admin - Genres";
+}
+
+@await Html.PartialAsync("_EntityLayout")
+
+<h1>Genres</h1>
+
+<p>
+    <a asp-action="Create" asp-controller="Genre" method="get">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th class="col-1">@Html.DisplayNameFor(model => model.FirstOrDefault().Id)</th>
+            <th class="w-100">@Html.DisplayNameFor(model => model.FirstOrDefault().Name)</th>
+            <th class="col-auto">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model) {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Id)</td>
+                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                <td class="d-flex flex-row gap-2">
+                    <a class="btn btn-outline-primary" asp-action="Details" asp-controller="Genre" asp-route-id="@item.Id">Details</a>
+                    <a class="btn btn-secondary" asp-action="Edit" asp-controller="Genre" asp-route-id="@item.Id">Edit</a>
+                    <a class="btn btn-danger" asp-action="Delete" asp-controller="Genre" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

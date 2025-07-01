@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 
-using WebApp.ViewModels;
+using WebApp.Models;
 
 namespace WebApp.Controllers
 {

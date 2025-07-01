@@ -1,4 +1,4 @@
-﻿@model IEnumerable<WebApp.ViewModels.BookViewModel>
+﻿@model IEnumerable<WebApp.Models.BookViewModel>
 
 @{
 	ViewData["Title"] = "Books";
@@ -6,9 +6,6 @@
 
 <h1>Books</h1>
 
-<p>
-	<a asp-action="Create">Create New</a>
-</p>
 <table class="table">
 	<thead>
 		<tr>
@@ -27,8 +24,6 @@
 			<th>
 				@Html.DisplayNameFor(model => model.Description)
 			</th>
-			<th></th>
-			<th></th>
 			<th></th>
 		</tr>
 	</thead>
@@ -52,12 +47,6 @@
 			</td>
 			<td>
 				<a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@item.Id">Details</a>
-			</td>
-			<td>
-				<a class="btn btn-secondary" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-			</td>
-			<td>
-				<a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
 			</td>
 		</tr>
 }
