@@ -1,0 +1,44 @@
+﻿@model IEnumerable<WebApp.Models.UserViewModel>
+@using DAL.Models
+
+@{
+    ViewData["Title"] = "Admin - Users";
+}
+
+@await Html.PartialAsync("_EntityLayout")
+
+<h1>Users</h1>
+
+<p>
+    <a asp-action="Create" asp-controller="User" method="get">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th class="col-1">@Html.DisplayNameFor(model => model.FirstOrDefault().Id)</th>
+            <th class="w-100">@Html.DisplayNameFor(model => model.FirstOrDefault().Username)</th>
+            <th class="w-100">@Html.DisplayNameFor(model => model.FirstOrDefault().Email)</th>
+            <th class="w-100">@Html.DisplayNameFor(model => model.FirstOrDefault().FirstName)</th>
+            <th class="w-100">@Html.DisplayNameFor(model => model.FirstOrDefault().LastName)</th>
+            <th class="w-100">@Html.DisplayNameFor(model => model.FirstOrDefault().Phone)</th>
+            <th class="col-auto">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model) {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Id)</td>
+                <td>@Html.DisplayFor(modelItem => item.Username)</td>
+                <td>@Html.DisplayFor(modelItem => item.Email)</td>
+                <td>@Html.DisplayFor(modelItem => item.FirstName)</td>
+                <td>@Html.DisplayFor(modelItem => item.LastName)</td>
+                <td>@Html.DisplayFor(modelItem => item.Phone)</td>
+                <td class="d-flex flex-row gap-2">
+                    <a class="btn btn-outline-primary" asp-action="Details" asp-controller="User" asp-route-id="@item.Id">Details</a>
+                    <a class="btn btn-secondary" asp-action="Edit" asp-controller="User" asp-route-id="@item.Id">Edit</a>
+                    <a class="btn btn-danger" asp-action="Delete" asp-controller="User" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

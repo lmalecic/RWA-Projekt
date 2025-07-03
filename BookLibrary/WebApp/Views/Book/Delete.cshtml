@@ -43,6 +43,15 @@
     </dl>
     
     <form asp-action="Delete">
+        <input hidden asp-for="@Model.Book.Id" value="@Model.Book.Id" />
+        <input hidden asp-for="@Model.Book.Name" value="@Model.Book.Name" />
+        <input hidden asp-for="@Model.Book.Isbn" value="@Model.Book.Isbn" />
+        <input hidden asp-for="@Model.Book.Author" value="@Model.Book.Author" />
+        <input hidden asp-for="@Model.Book.Description" value="@Model.Book.Description" />
+        <input hidden asp-for="@Model.Book.GenreId" value="@Model.Book.GenreId" />
+        <input hidden asp-for="@Model.Book.PublicationDate" value="@Model.Book.PublicationDate" />
+        <input hidden asp-for="@Model.ReturnUrl" value="@Model.ReturnUrl" />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <input type="submit" value="Confirm" class="btn btn-danger" />
         <a asp-action="Books" asp-controller="Admin" class="btn btn-primary">Cancel</a>
     </form>

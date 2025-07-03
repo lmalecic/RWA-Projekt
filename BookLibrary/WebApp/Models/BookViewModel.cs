@@ -13,14 +13,17 @@ namespace WebApp.Models
 
         [Required]
         [Display(Name = "ISBN")]
+        [StringLength(17)]
         public string Isbn { get; set; } = null!;
 
         [Required]
         [Display(Name = "Title")]
+        [StringLength(255)]
         public string Name { get; set; } = null!;
 
         [Required]
         [Display(Name = "Author")]
+        [StringLength(255)]
         public string Author { get; set; } = null!;
 
         [Display(Name = "Description")]
@@ -29,18 +32,9 @@ namespace WebApp.Models
         [Display(Name = "Publication Date")]
         public DateOnly? PublicationDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
 
-        [Display(Name = "Genre")]
-        public GenreViewModel Genre { get; set; } = null!;
-
         [Required]
         [Display(Name = "Genre")]
         [Exists<Genre>(ErrorMessage = "Genre does not exist!")]
         public int GenreId { get; set; } = 1;
-
-        //public ICollection<BookLocation> BookLocations { get; set; } = new List<BookLocation>();
-
-        //public ICollection<UserReservation> UserReservations { get; set; } = new List<UserReservation>();
-
-        //public ICollection<UserReview> UserReviews { get; set; } = new List<UserReview>();
     }
 }

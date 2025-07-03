@@ -2,7 +2,6 @@
 using DAL.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,7 +17,7 @@ namespace DAL.Services
         public UserReviewService(BookLibraryContext context, IMapper mapper)
         {
             _context = context;
-            _mapper = mapper;
+            this._mapper = mapper;
         }
 
         public UserReview Create(UserReview entity)
@@ -63,7 +62,9 @@ namespace DAL.Services
         public IEnumerable<UserReview> GetAll()
         {
             return _context.UserReviews
-                .AsEnumerable();
+                .Include(r => r.Book)
+                .Include(r => r.User)
+                .ToList();
         }
 
         public UserReview Update(UserReview entity)

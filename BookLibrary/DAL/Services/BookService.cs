@@ -34,7 +34,7 @@ namespace DAL.Services
                 .Include(x => x.UserReservations)
                 .Include(x => x.UserReviews)
                 .Include(x => x.Genre)
-                .First(x => x.Id == id);
+                .FirstOrDefault(x => x.Id == id);
 
             if (existing == null) {
                 _logService.Log($"Could not find book with id={id}", 1);

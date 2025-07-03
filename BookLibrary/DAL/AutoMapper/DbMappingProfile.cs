@@ -30,7 +30,9 @@ namespace DAL.AutoMapper
             CreateMap<User, User>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.UserReviews, opt => opt.Ignore())
-                .ForMember(dest => dest.UserReservations, opt => opt.Ignore());
+                .ForMember(dest => dest.UserReservations, opt => opt.Ignore())
+                .ForMember(dest => dest.PwdHash, opt => opt.Ignore())
+                .ForMember(dest => dest.Role, opt => opt.Ignore());
 
             CreateMap<UserReservation, UserReservation>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())

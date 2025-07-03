@@ -1,0 +1,26 @@
+﻿@model WebApp.Models.GenreViewModel
+
+@{
+    ViewData["Title"] = "Edit Genre";
+}
+
+<h2>Edit Genre</h2>
+
+<form asp-action="Edit">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <input type="hidden" asp-for="@Model.Id" value="@Model.Id"/>
+    
+    <div class="form-group mb-2">
+        <label asp-for="@Model.Name" class="control-label"></label>
+        <input asp-for="@Model.Name" value="@Model.Name" class="form-control" />
+        <span asp-validation-for="@Model.Name" class="text-danger"></span>
+    </div>
+    
+    <input type="submit" class="btn btn-primary" value="Save changes"/>
+    <a asp-action="Genres" asp-controller="Admin" class="btn btn-secondary">Return</a>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

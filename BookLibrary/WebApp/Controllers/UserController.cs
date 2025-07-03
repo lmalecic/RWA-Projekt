@@ -1,6 +1,7 @@
 ﻿using AspNetCoreGeneratedDocument;
 using AutoMapper;
 using DAL.Models;
+using DAL.Services;
 using Isopoh.Cryptography.Argon2;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -17,11 +18,22 @@ namespace WebApp.Controllers
     {
         private readonly BookLibraryContext _context;
         private readonly IMapper _mapper;
+        private readonly UserService _userService;
+        private readonly UserReservationService _reservationService;
+        private readonly UserReviewService _reviewService;
 
-        public UserController(BookLibraryContext context, IMapper mapper)
+        public UserController(
+            BookLibraryContext context, 
+            IMapper mapper, 
+            UserService userService,
+            UserReservationService reservationService,
+            UserReviewService reviewService)
         {
-            this._context = context;
-            this._mapper = mapper;
+            _context = context;
+            _mapper = mapper;
+            _userService = userService;
+            _reservationService = reservationService;
+            _reviewService = reviewService;
         }
 
         [HttpGet]
@@ -42,13 +54,10 @@ namespace WebApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult Register(UserViewModel userViewModel)
+        public IActionResult Register(UserRegisterViewModel userViewModel)
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return View();
-
                 // Check if there is such a username in the database already
                 var trimmedUsername = userViewModel.Username.Trim();
                 if (_context.Users.Any(x => x.Username.Equals(trimmedUsername)))
@@ -131,15 +140,145 @@ namespace WebApp.Controllers
                 return View();
         }
 
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
-            Task.Run(async () =>
-                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme)
-            ).GetAwaiter().GetResult();
-
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return View();
         }
 
+        public ActionResult Details(int id)
+        {
+            try {
+                var dbEntity = _userService.Get(id);
+                var entityViewModel = _mapper.Map<UserViewModel>(dbEntity);
+                var reservations = dbEntity.UserReservations.Select(_mapper.Map<UserReservationViewModel>);
+                var reviews = dbEntity.UserReviews.Select(_mapper.Map<UserReviewViewModel>);
 
+                return View(new UserDetailsViewModel {
+                    User = entityViewModel,
+                    Reservations = reservations,
+                    Reviews = reviews
+                });
+            }
+            catch (FileNotFoundException) {
+                return NotFound();
+            }
+        }
+
+        // GET: GenreController/Edit/5
+        public ActionResult Edit(int id)
+        {
+            try {
+                var dbEntity = _userService.Get(id);  // This already includes Reservations and Reviews with Books
+                var viewModel = new UserDetailsViewModel {
+                    User = _mapper.Map<UserViewModel>(dbEntity),
+                    Reservations = dbEntity.UserReservations.Select(_mapper.Map<UserReservationViewModel>),
+                    Reviews = dbEntity.UserReviews.Select(_mapper.Map<UserReviewViewModel>)
+                };
+                return View(viewModel);
+            }
+            catch (FileNotFoundException) {
+                return NotFound();
+            }
+            catch (Exception) {
+                return StatusCode(500, "An error occurred while retrieving the user for editing.");
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit(UserViewModel editViewModel)
+        {
+            try {
+                var dbEntity = _mapper.Map<User>(editViewModel);
+                var updated = _userService.Update(dbEntity);
+                return RedirectToAction(nameof(Details), updated);
+            }
+            catch {
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpPost]
+        public ActionResult DeleteReservation(int userId, int reservationId)
+        {
+            try
+            {
+                var reservation = _reservationService.Get(reservationId);
+                
+                if (reservation == null || reservation.UserId != userId)
+                    return NotFound();
+
+                _reservationService.Delete(reservationId);
+                
+                return RedirectToAction(nameof(Edit), new { id = userId });
+            }
+            catch (FileNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while deleting the reservation.");
+            }
+        }
+
+        [HttpPost]
+        public ActionResult DeleteReview(int userId, int reviewId)
+        {
+            try
+            {
+                var review = _reviewService.Get(reviewId);
+                
+                if (review == null || review.UserId != userId)
+                    return NotFound();
+
+                _reviewService.Delete(reviewId);
+                
+                return RedirectToAction(nameof(Edit), new { id = userId });
+            }
+            catch (FileNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while deleting the review.");
+            }
+        }
+
+        // GET: GenreController/Delete/5
+        public ActionResult Delete(int id)
+        {
+            try {
+                var dbEntity = _userService.Get(id);
+                var viewModel = _mapper.Map<UserViewModel>(dbEntity);
+                return View(viewModel);
+            }
+            catch (FileNotFoundException) {
+                return NotFound();
+            }
+            catch (Exception) {
+                return StatusCode(500, "An error occurred while retrieving the genre for deletion.");
+            }
+        }
+
+        // POST: GenreController/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(UserViewModel deleteViewModel)
+        {
+            try {
+                _userService.Delete(deleteViewModel.Id);
+                return RedirectToAction(nameof(AdminController.Users), "Admin");
+            }
+            catch (BadHttpRequestException ex) {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(deleteViewModel);
+            }
+            catch (Exception ex) {
+                return StatusCode(500, "Internal server error");
+            }
+        }
     }
 }

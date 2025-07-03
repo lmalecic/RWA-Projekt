@@ -2,13 +2,13 @@
 Do not use database modifying (ALTER DATABASE), creating (CREATE DATABASE) or switching (USE) statements 
 in this file.
 */
-
+/*
 create database BookLibrary
 go
 
 use BookLibrary
 go
-
+*/
 -- 1-N veza
 create table Genre (
 	Id int primary key identity,
@@ -37,8 +37,8 @@ create table [User] (
 	Id int primary key identity,
 	Username nvarchar(31) not null,
 	PwdHash nvarchar(255) not null, -- Salt also stored
-	Email nvarchar(255) not null,
     Role nvarchar(50) not null default 'User',
+	Email nvarchar(255),
 	FirstName nvarchar(50),
 	LastName nvarchar(50),
 	Phone nvarchar(50)

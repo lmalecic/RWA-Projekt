@@ -1,15 +1,23 @@
+using DAL.AutoMapper;
 using DAL.Models;
 using DAL.Services;
 using Microsoft.EntityFrameworkCore;
+using WebApp.AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddAutoMapper(typeof(WebApp.AutoMapper.ViewModelMappingProfile));
+builder.Services.AddAutoMapper(cfg => {
+    cfg.AddProfile<DbMappingProfile>();
+    cfg.AddProfile<ViewModelMappingProfile>();
+});
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<LogService>();
 builder.Services.AddScoped<BookService>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<UserReservationService>();
+builder.Services.AddScoped<UserReviewService>();
 builder.Services.AddScoped<IEntityService<Genre>, GenreService>();
 builder.Services.AddScoped<IEntityService<Location>, LocationService>();
 

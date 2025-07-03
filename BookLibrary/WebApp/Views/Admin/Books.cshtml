@@ -25,7 +25,7 @@
             <th>@Html.DisplayNameFor(model => model.SearchResult.Items.FirstOrDefault().Name)</th>
             <th>@Html.DisplayNameFor(model => model.SearchResult.Items.FirstOrDefault().Author)</th>
             <th>@Html.DisplayNameFor(model => model.SearchResult.Items.FirstOrDefault().Description)</th>
-            <th>@Html.DisplayNameFor(model => model.SearchResult.Items.FirstOrDefault().Genre)</th>
+            <th>@Html.DisplayNameFor(model => model.Genres.FirstOrDefault().Name)</th>
             <th>Actions</th>
             <th></th>
             <th></th>
@@ -39,7 +39,7 @@
                 <td>@Html.DisplayFor(modelItem => item.Name)</td>
                 <td>@Html.DisplayFor(modelItem => item.Author)</td>
                 <td>@Html.DisplayFor(modelItem => item.Description)</td>
-                <td>@Html.DisplayFor(modelItem => item.Genre.Name)</td>
+                <td>@Html.DisplayFor(modelItem => modelItem.Genres.FirstOrDefault(g => g.Id == item.GenreId).Name)</td>
                 <td>
                     <a class="btn btn-outline-primary" asp-action="Details" asp-controller="Book" asp-route-id="@item.Id" asp-route-returnUrl="Admin/Books">Details</a>
                 </td>

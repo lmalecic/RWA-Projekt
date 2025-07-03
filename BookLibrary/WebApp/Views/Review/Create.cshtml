@@ -1,0 +1,52 @@
+﻿@model WebApp.Models.ReviewCreateViewModel
+
+@{
+    ViewData["Title"] = "Create Review";
+}
+
+<h2>Create New Review for @Model.User.Username</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create" asp-controller="Review" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <input type="hidden" asp-for="@Model.UserId" />
+            <input type="hidden" asp-for="@Model.User.Id" />
+            <input type="hidden" asp-for="@Model.User.Username" />
+
+            <div class="form-group mb-3">
+                <label asp-for="@Model.BookId" class="control-label"></label>
+                <select asp-for="@Model.BookId" class="form-select"
+                        asp-items="@(new SelectList(Model.AvailableBooks, "Id", "Name"))">
+                    <option value="">-- Select Book --</option>
+                </select>
+                <span asp-validation-for="@Model.BookId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="@Model.Rating" class="control-label"></label>
+                <select asp-for="@Model.Rating" class="form-select">
+                    <option value="">-- Select Rating --</option>
+                    <option value="1">1 - Poor</option>
+                    <option value="2">2 - Fair</option>
+                    <option value="3">3 - Good</option>
+                    <option value="4">4 - Very Good</option>
+                    <option value="5">5 - Excellent</option>
+                </select>
+                <span asp-validation-for="@Model.Rating" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="@Model.Text" class="control-label"></label>
+                <textarea asp-for="@Model.Text" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="@Model.Text" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Create</button>
+                <a asp-action="Edit" asp-controller="User" asp-route-id="@Model.UserId" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

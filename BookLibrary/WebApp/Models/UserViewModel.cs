@@ -5,15 +5,16 @@ namespace WebApp.Models
 {
     public class UserViewModel
     {
+        [Display(Name = "User Id")]
+        public int Id { get; set; }
+
         [Required(ErrorMessage = "Username is required")]
+        [StringLength(31, ErrorMessage = "Username can't be longer than 31 characters!")]
         public string Username { get; set; } = null!;
 
-        [Required(ErrorMessage = "Password is required")]
-        [StringLength(256, MinimumLength = 8, ErrorMessage = "Password should be at least 8 characters long")]
-        public string Password { get; set; } = null!;
-
         [EmailAddress(ErrorMessage = "Provide a correct e-mail address")]
-        public string Email { get; set; } = null!;
+        [StringLength(255, ErrorMessage = "Email should be no longer than 255 characters!")]
+        public string? Email { get; set; } = null!;
 
         [Display(Name = "First name")]
         [StringLength(50, MinimumLength = 2, ErrorMessage = "First name should be between 2 and 50 characters long")]
@@ -23,10 +24,9 @@ namespace WebApp.Models
         [StringLength(50, MinimumLength = 2, ErrorMessage = "Last name should be between 2 and 50 characters long")]
         public string? LastName { get; set; }
 
+        [Display(Name = "Phone number")]
         [Phone(ErrorMessage = "Provide a correct phone number")]
+        [StringLength(50)]
         public string? Phone { get; set; }
-
-        [HiddenInput]
-        public string? ReturnUrl { get; set; }
     }
 }

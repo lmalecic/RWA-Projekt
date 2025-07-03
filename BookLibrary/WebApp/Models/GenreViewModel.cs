@@ -10,9 +10,5 @@ namespace WebApp.Models
 
         [Display(Name = "Genre name")]
         public string Name { get; set; } = null!;
-
-        public GenreViewModel()
-        {
-        }
     }
 }

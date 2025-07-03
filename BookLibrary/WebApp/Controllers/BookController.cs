@@ -48,7 +48,7 @@ namespace WebApp.Controllers
             catch (FileNotFoundException ex) {
                 return NotFound(ex.Message);
             }
-            catch (Exception) {
+            catch (Exception ex) {
                 return StatusCode(500, "Internal server error");
             }
         }
@@ -57,7 +57,7 @@ namespace WebApp.Controllers
         [HttpGet]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public ActionResult Create(string? returnUrl)
+        public ActionResult Create()
         {
             var model = new BookCreateViewModel {
                 Book = new BookViewModel(),
@@ -111,12 +111,8 @@ namespace WebApp.Controllers
         [Authorize(Roles = "Admin")]
         public ActionResult Edit(BookEditViewModel editViewModel)
         {
-            if (!ModelState.IsValid) {
-                return View(editViewModel);
-            }
-
             try {
-                var book = _mapper.Map<Book>(editViewModel);
+                var book = _mapper.Map<Book>(editViewModel.Book);
                 _bookService.Update(book);
 
                 return RedirectToAction(nameof(Details), new { id = book.Id, returnUrl = editViewModel.ReturnUrl });
@@ -131,15 +127,16 @@ namespace WebApp.Controllers
 
         // GET: BooksController/Delete/5
         [HttpGet]
-        [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
         public ActionResult Delete(int id)
         {
             try {
                 var dbBook = _bookService.Get(id);
                 var book = _mapper.Map<BookViewModel>(dbBook);
-
-                return View(book);
+                return View(new BookDeleteViewModel {
+                    Book = book,
+                    ReturnUrl = $"~/Admin/{nameof(AdminController.Books)}"
+                });
             }
             catch (FileNotFoundException ex) {
                 return NotFound(ex.Message);
@@ -162,7 +159,9 @@ namespace WebApp.Controllers
                     RedirectToAction(nameof(Index));
             }
             catch (BadHttpRequestException ex) {
-                return BadRequest(ex.Message);
+                // This exception is thrown when the book is used in reservations, reviews, or locations
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(deleteViewModel);
             }
             catch (Exception ex) {
                 return StatusCode(500, "Internal server error");

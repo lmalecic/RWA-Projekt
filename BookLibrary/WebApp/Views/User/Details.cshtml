@@ -1,0 +1,127 @@
+﻿@model WebApp.Models.UserDetailsViewModel
+
+@{
+    ViewData["Title"] = $"User {Model.User.Username}";
+}
+
+<h1>Details</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <dl class="row">
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.User.Id)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.User.Id)
+            </dd>
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.User.Username)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.User.Username)
+            </dd>
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.User.Email)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.User.Email)
+            </dd>
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.User.FirstName)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.User.FirstName)
+            </dd>
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.User.LastName)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.User.LastName)
+            </dd>
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.User.Phone)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.User.Phone)
+            </dd>
+        </dl>
+    </div>
+    
+    <div class="col-md-6">
+        <h3>Reservations</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Book</th>
+                    <th>@Html.DisplayNameFor(m => m.Reservations.FirstOrDefault().Date)</th>
+                    <th>@Html.DisplayNameFor(m => m.Reservations.FirstOrDefault().Status)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Reservations?.Any() == true)
+                {
+                    @foreach (var reservation in Model.Reservations)
+                    {
+                        <tr>
+                            <td>
+                                @if (reservation.Book != null)
+                                {
+                                    <a asp-controller="Book" asp-action="Details" asp-route-id="@reservation.Book.Id">
+                                        @reservation.Book.Name
+                                    </a>
+                                }
+                            </td>
+                            <td>@reservation.Date?.ToShortDateString()</td>
+                            <td>@reservation.Status</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="3" class="text-center">No reservations found</td></tr>
+                }
+            </tbody>
+        </table>
+
+        <h3 class="mt-4">Reviews</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>@Html.DisplayNameFor(m => m.Reviews.FirstOrDefault().Book)</th>
+                    <th>@Html.DisplayNameFor(m => m.Reviews.FirstOrDefault().Text)</th>
+                    <th>@Html.DisplayNameFor(m => m.Reviews.FirstOrDefault().Rating)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Reviews?.Any() == true)
+                {
+                    @foreach (var review in Model.Reviews)
+                    {
+                        <tr>
+                            <td>
+                                @if (review.Book != null)
+                                {
+                                    <a asp-controller="Book" asp-action="Details" asp-route-id="@review.Book.Id">
+                                        @review.Book.Name
+                                    </a>
+                                }
+                            </td>
+                            <td>@review.Text</td>
+                            <td>@review.Rating</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="3" class="text-center">No reviews found</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.User.Id" class="btn btn-secondary">Edit</a>
+    <a asp-action="Users" asp-controller="Admin" class="btn btn-primary">Return</a>
+</div>

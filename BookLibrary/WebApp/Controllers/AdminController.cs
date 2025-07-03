@@ -14,12 +14,14 @@ namespace WebApp.Controllers
     public class AdminController : Controller
     {
         private readonly BookService _bookService;
+        private readonly UserService _userService;
         private readonly IEntityService<Genre> _genreService;
         private readonly IEntityService<Location> _locationService;
         private readonly IMapper _mapper;
 
         public AdminController(
-            BookService bookService, 
+            BookService bookService,
+            UserService userService,
             IMapper mapper, 
             IEntityService<Genre> genreService,
             IEntityService<Location> locationService)
@@ -28,6 +30,7 @@ namespace WebApp.Controllers
             this._mapper = mapper;
             this._genreService = genreService;
             this._locationService = locationService;
+            this._userService = userService;
         }
 
         [HttpGet("[action]")]
@@ -62,15 +65,15 @@ namespace WebApp.Controllers
         [HttpGet("[action]")]
         public IActionResult Locations()
         {
-            //var locations = _locationService.GetAll().Select(_mapper.Map<LocationViewModel>);
-            return View();
+            var locations = _locationService.GetAll().Select(_mapper.Map<LocationViewModel>);
+            return View(locations);
         }
 
         [HttpGet("[action]")]
         public IActionResult Users()
         {
-            //var users = _userService.GetAll().Select(_mapper.Map<UserViewModel>);
-            return View();
+            var users = _userService.GetAll().Select(_mapper.Map<UserViewModel>);
+            return View(users);
         }
     }
 }
