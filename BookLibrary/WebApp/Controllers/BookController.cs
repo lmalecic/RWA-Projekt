@@ -26,10 +26,25 @@ namespace WebApp.Controllers
         // Non-admin view of books
         public ActionResult Index()
         {
-            var dbBooks = _bookService.GetAll();
-            var books = _mapper.Map<IEnumerable<BookViewModel>>(dbBooks);
+            var searchParams = new BookSearchParams
+            {
+                Page = 1,
+                Count = 10 // Default page size
+            };
 
-            return View(books);
+            var searchResult = _bookService.Search(searchParams);
+            var viewModel = new BooksViewModel
+            {
+                SearchResult = new SearchResult<BookViewModel>(
+                    searchResult.Count,
+                    searchResult.Page,
+                    searchResult.TotalPages,
+                    _mapper.Map<IEnumerable<BookViewModel>>(searchResult.Items)
+                ),
+                Genres = _genreService.GetAll().Select(_mapper.Map<GenreViewModel>)
+            };
+
+            return View(viewModel);
         }
 
         // GET: BooksController/Details/5
@@ -166,6 +181,24 @@ namespace WebApp.Controllers
             catch (Exception ex) {
                 return StatusCode(500, "Internal server error");
             }
+        }
+
+        [HttpGet]
+        public IActionResult Search([FromQuery] BookSearchParams searchParams)
+        {
+            var searchResult = _bookService.Search(searchParams);
+            var viewModel = new BooksViewModel
+            {
+                SearchResult = new SearchResult<BookViewModel>(
+                    searchResult.Count,
+                    searchResult.Page,
+                    searchResult.TotalPages,
+                    _mapper.Map<IEnumerable<BookViewModel>>(searchResult.Items)
+                ),
+                Genres = _genreService.GetAll().Select(_mapper.Map<GenreViewModel>)
+            };
+            
+            return PartialView("_BooksTable", viewModel);
         }
     }
 }

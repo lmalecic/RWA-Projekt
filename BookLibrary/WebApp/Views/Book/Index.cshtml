@@ -1,54 +1,210 @@
-﻿@model IEnumerable<WebApp.Models.BookViewModel>
+﻿@model WebApp.Models.BooksViewModel
 
 @{
-	ViewData["Title"] = "Books";
+    ViewData["Title"] = "Books";
+    var currentPage = Model.SearchResult.Page;
+    var totalPages = Model.SearchResult.TotalPages;
+    var books = Model.SearchResult.Items;
 }
 
 <h1>Books</h1>
 
-<table class="table">
-	<thead>
-		<tr>
-			<th>
-				@Html.DisplayNameFor(model => model.Id)
-			</th>
-			<th>
-				@Html.DisplayNameFor(model => model.Isbn)
-			</th>
-			<th>
-				@Html.DisplayNameFor(model => model.Name)
-			</th>
-			<th>
-				@Html.DisplayNameFor(model => model.Author)
-			</th>
-			<th>
-				@Html.DisplayNameFor(model => model.Description)
-			</th>
-			<th></th>
-		</tr>
-	</thead>
-	<tbody>
-@foreach (var item in Model) {
-		<tr>
-			<td>
-				@Html.DisplayFor(modelItem => item.Id)
-			</td>
-			<td>
-				@Html.DisplayFor(modelItem => item.Isbn)
-			</td>
-			<td>
-				@Html.DisplayFor(modelItem => item.Name)
-			</td>
-			<td>
-				@Html.DisplayFor(modelItem => item.Author)
-			</td>
-			<td>
-				@Html.DisplayFor(modelItem => item.Description)
-			</td>
-			<td>
-				<a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@item.Id">Details</a>
-			</td>
-		</tr>
+<div id="searchForm" class="mb-3">
+    <div class="row g-3">
+        <div class="col-auto">
+            <input type="text" class="form-control" id="searchName" placeholder="Book title...">
+        </div>
+        <div class="col-auto">
+            <input type="text" class="form-control" id="searchAuthor" placeholder="Author...">
+        </div>
+        <div class="col-auto">
+            <select class="form-select" id="searchGenre">
+                <option value="">All Genres</option>
+                @foreach (var genre in Model.Genres)
+                {
+                    <option value="@genre.Id">@genre.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="button" class="btn btn-primary" id="searchButton">Search</button>
+            <button type="button" class="btn btn-outline-secondary" id="clearButton">Clear</button>
+        </div>
+    </div>
+</div>
+
+<div id="booksTable">
+    <partial name="_BooksTable" model="Model" />
+</div>
+
+<div class="d-flex justify-content-between align-items-center mt-3">
+    <div>
+        <span id="pageInfo">Showing page @currentPage of @totalPages</span>
+    </div>
+    <div>
+        <nav aria-label="Books navigation">
+            <ul class="pagination" id="pagination">
+            </ul>
+        </nav>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentPage = @currentPage;
+        let totalPages = @totalPages;
+        const itemsPerPage = 10;
+
+        function searchBooks(page) {
+            if (page < 1 || page > totalPages) return;
+
+            const name = document.getElementById('searchName').value;
+            const author = document.getElementById('searchAuthor').value;
+            const genreId = document.getElementById('searchGenre').value;
+
+            $.get(`/Book/Search`, {
+                page: page,
+                count: itemsPerPage,
+                name: name,
+                author: author,
+                genreId: genreId
+            })
+            .done(function (data) {
+                $('#booksTable').html(data);
+                currentPage = parseInt(data.match(/data-current-page="(\d+)"/)[1]);
+                totalPages = parseInt(data.match(/data-total-pages="(\d+)"/)[1]);
+                updatePagination();
+                updatePageInfo();
+            })
+            .fail(function (error) {
+                console.error('Error fetching books:', error);
+            });
+        }
+
+        function updatePageInfo() {
+            $('#pageInfo').text(`Showing page ${currentPage} of ${totalPages}`);
+        }
+
+        function updatePagination() {
+            const pagination = $('#pagination');
+            pagination.empty();
+
+            // Previous button
+            pagination.append(`
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="javascript:void(0)" data-page="${currentPage - 1}">Previous</a>
+                </li>
+            `);
+
+            // First page
+            pagination.append(`
+                <li class="page-item ${currentPage === 1 ? 'active' : ''}">
+                    <a class="page-link" href="javascript:void(0)" data-page="1">1</a>
+                </li>
+            `);
+
+            // Ellipsis after first page
+            if (currentPage > 3) {
+                pagination.append(`
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                `);
+            }
+
+            // Previous page number
+            if (currentPage - 1 > 1) {
+                pagination.append(`
+                    <li class="page-item">
+                        <a class="page-link" href="javascript:void(0)" data-page="${currentPage - 1}">${currentPage - 1}</a>
+                    </li>
+                `);
+            }
+
+            // Current page (if not first or last)
+            if (currentPage !== 1 && currentPage !== totalPages) {
+                pagination.append(`
+                    <li class="page-item active">
+                        <a class="page-link" href="javascript:void(0)" data-page="${currentPage}">${currentPage}</a>
+                    </li>
+                `);
+            }
+
+            // Next page number
+            if (currentPage + 1 < totalPages) {
+                pagination.append(`
+                    <li class="page-item">
+                        <a class="page-link" href="javascript:void(0)" data-page="${currentPage + 1}">${currentPage + 1}</a>
+                    </li>
+                `);
+            }
+
+            // Ellipsis before last page
+            if (currentPage < totalPages - 2) {
+                pagination.append(`
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                `);
+            }
+
+            // Last page (if more than one page)
+            if (totalPages > 1) {
+                pagination.append(`
+                    <li class="page-item ${currentPage === totalPages ? 'active' : ''}">
+                        <a class="page-link" href="javascript:void(0)" data-page="${totalPages}">${totalPages}</a>
+                    </li>
+                `);
+            }
+
+            // Next button
+            pagination.append(`
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="javascript:void(0)" data-page="${currentPage + 1}">Next</a>
+                </li>
+            `);
+        }
+
+        // Event handlers
+        $(document).ready(function() {
+            // Initial values are set from the model
+            updatePagination();
+
+            // Search button click
+            $('#searchButton').on('click', function() {
+                searchBooks(1);
+            });
+
+            // Clear button click
+            $('#clearButton').on('click', function() {
+                $('#searchName').val('');
+                $('#searchAuthor').val('');
+                $('#searchGenre').val('');
+                searchBooks(1);
+            });
+
+            // Pagination click events
+            $(document).on('click', '.page-link', function(e) {
+                e.preventDefault();
+                
+                if ($(this).parent().hasClass('disabled')) {
+                    return;
+                }
+
+                const page = parseInt($(this).data('page'));
+                console.log('Clicked page:', page);
+                
+                if (!isNaN(page) && page >= 1 && page <= totalPages) {
+                    searchBooks(page);
+                }
+            });
+
+            // Handle enter key in search inputs
+            $('#searchName, #searchAuthor').on('keypress', function(e) {
+                if (e.which === 13) {
+                    searchBooks(1);
+                }
+            });
+        });
+    </script>
 }
-	</tbody>
-</table>
