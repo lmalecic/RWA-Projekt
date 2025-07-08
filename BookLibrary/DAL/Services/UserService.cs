@@ -31,7 +31,20 @@ namespace DAL.Services
                 .FirstOrDefault(x => x.Id == id);
 
             return entity != null ? entity
-                : throw new FileNotFoundException($"Genre with id {id} does not exist.");
+                : throw new FileNotFoundException($"User with id {id} does not exist.");
+        }
+
+        public User Get(string username)
+        {
+            var entity = _context.Users
+                .Include(u => u.UserReservations)
+                    .ThenInclude(ur => ur.Book)
+                .Include(u => u.UserReviews)
+                    .ThenInclude(ur => ur.Book)
+                .FirstOrDefault(x => x.Username == username);
+
+            return entity != null ? entity
+                : throw new FileNotFoundException($"User with username {username} does not exist.");
         }
 
         public User Create(User entity)

@@ -5,9 +5,11 @@ using DAL.Services;
 using Isopoh.Cryptography.Argon2;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 using WebApp.Models;
@@ -278,6 +280,146 @@ namespace WebApp.Controllers
             }
             catch (Exception ex) {
                 return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult ProfileDetails(string username)
+        {
+            if (User.Identity == null || !User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            try {
+                var dbUser = _userService.Get(username);
+                var userViewModel = _mapper.Map<UserViewModel>(dbUser);
+                return View(userViewModel);
+            }
+            catch (FileNotFoundException)
+            {
+                return NotFound("User not found!");
+            }
+            catch (Exception ex) {
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult ProfileEdit(int id)
+        {
+            if (User.Identity == null || !User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction(nameof(Login));
+            }
+            try {
+                var dbUser = _userService.Get(id);
+                var viewModel = _mapper.Map<UserViewModel>(dbUser);
+                return View(viewModel);
+            }
+            catch (FileNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex) {
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public IActionResult ProfileEdit(UserViewModel userViewModel)
+        {
+            if (User.Identity == null || !User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            // Since the user can only edit their own profile, we should probably check the user Ids or usernames
+
+            try
+            {
+                var dbUser = _mapper.Map<User>(userViewModel);
+                var updatedUser = _userService.Update(dbUser);
+                return RedirectToAction(nameof(ProfileDetails), new { id = updatedUser.Id });
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(userViewModel);
+            }
+        }
+
+        // Ajax method to get profile data
+        public JsonResult GetProfileData(int id)
+        {
+            try {
+                var user = _userService.Get(id);
+                user.UserReviews = null!;
+                user.UserReservations = null!;
+                return Json(user);
+            }
+            catch (FileNotFoundException)
+            {
+                return Json(new { error = "User not found." });
+            }
+            catch (Exception) {
+                return Json(new { error = "An error occurred while retrieving the user." });
+            }
+        }
+
+        [HttpPut]
+        [Authorize]
+        public JsonResult SetProfileData(int id, [FromBody] UserViewModel userViewModel)
+        {
+            try
+            {
+                var existingUser = _userService.Get(id);
+                if (existingUser == null)
+                {
+                    return Json(new { error = "User not found" });
+                }
+
+                // Only update fields that were provided in the request
+                if (!string.IsNullOrEmpty(userViewModel.FirstName))
+                    existingUser.FirstName = userViewModel.FirstName;
+                if (!string.IsNullOrEmpty(userViewModel.LastName))
+                    existingUser.LastName = userViewModel.LastName;
+                if (!string.IsNullOrEmpty(userViewModel.Email))
+                    existingUser.Email = userViewModel.Email;
+                if (!string.IsNullOrEmpty(userViewModel.Phone))
+                    existingUser.Phone = userViewModel.Phone;
+
+                // Validate only the fields that were provided
+                var validationContext = new ValidationContext(existingUser, serviceProvider: null, items: null);
+                var validationResults = new List<ValidationResult>();
+                var isValid = Validator.TryValidateObject(existingUser, validationContext, validationResults, validateAllProperties: true);
+
+                if (!isValid)
+                {
+                    return Json(new { error = string.Join(", ", validationResults.Select(r => r.ErrorMessage)) });
+                }
+
+                var updatedUser = _userService.Update(existingUser);
+                
+                return Json(new { 
+                    success = true, 
+                    user = new { 
+                        id = updatedUser.Id,
+                        username = updatedUser.Username,
+                        firstName = updatedUser.FirstName,
+                        lastName = updatedUser.LastName,
+                        email = updatedUser.Email,
+                        phone = updatedUser.Phone
+                    } 
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = "Failed to update profile: " + ex.Message });
             }
         }
     }
