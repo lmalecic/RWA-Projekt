@@ -10,13 +10,13 @@
 
 @await Html.PartialAsync("_EntityLayout")
 
-<h1>Books</h1>
+<h1>
+    Books
+    <a class="btn btn-primary" asp-action="Create" asp-controller="Book" method="get">Create new</a>
+</h1>
 
 @await Html.PartialAsync("_BookSearchForm")
 
-<p>
-    <a asp-action="Create" asp-controller="Book" method="get">Create New</a>
-</p>
 <table class="table">
     <thead>
         <tr>

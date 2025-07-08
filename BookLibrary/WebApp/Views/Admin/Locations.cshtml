@@ -7,11 +7,11 @@
 
 @await Html.PartialAsync("_EntityLayout")
 
-<h1>Locations</h1>
+<h1>
+    Locations
+    <a class="btn btn-primary" asp-action="Create" asp-controller="Location" method="get">Create new</a>
+</h1>
 
-<p>
-    <a asp-action="Create" asp-controller="Location" method="get">Create New</a>
-</p>
 <table class="table">
     <thead>
         <tr>

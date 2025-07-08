@@ -7,11 +7,11 @@
 
 @await Html.PartialAsync("_EntityLayout")
 
-<h1>Genres</h1>
+<h1>
+    Genres
+    <a class="btn btn-primary" asp-action="Create" asp-controller="Genre" method="get">Create new</a>
+</h1>
 
-<p>
-    <a asp-action="Create" asp-controller="Genre" method="get">Create New</a>
-</p>
 <table class="table">
     <thead>
         <tr>
