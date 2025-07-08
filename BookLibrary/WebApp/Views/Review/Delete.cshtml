@@ -16,6 +16,9 @@
             <dt class="col-sm-3">Book</dt>
             <dd class="col-sm-9">@Model.Book.Name</dd>
 
+            <dt class="col-sm-3">Author</dt>
+            <dd class="col-sm-9">@Model.Book.Author</dd>
+
             <dt class="col-sm-3">Rating</dt>
             <dd class="col-sm-9">@Model.Rating</dd>
 
@@ -28,8 +31,15 @@
             <input type="hidden" asp-for="@Model.UserId" />
             <input type="hidden" asp-for="@Model.User.Id" />
             <input type="hidden" asp-for="@Model.User.Username" />
+
+            <!-- Book properties -->
             <input type="hidden" asp-for="@Model.Book.Id" />
             <input type="hidden" asp-for="@Model.Book.Name" />
+            <input type="hidden" asp-for="@Model.Book.Author" />
+            <input type="hidden" asp-for="@Model.Book.Isbn" />
+            <input type="hidden" asp-for="@Model.Book.Description" />
+            <input type="hidden" asp-for="@Model.Book.PublicationDate" />
+            <input type="hidden" asp-for="@Model.Book.GenreId" />
 
             <div class="form-group">
                 <button type="submit" class="btn btn-danger">Delete</button>

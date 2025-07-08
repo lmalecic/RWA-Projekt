@@ -55,7 +55,6 @@ namespace WebApp.Controllers
 
         // GET: BooksController/Create
         [HttpGet]
-        [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
         public ActionResult Create()
         {
@@ -86,6 +85,7 @@ namespace WebApp.Controllers
         }
 
         // GET: BooksController/Edit/5
+        [HttpGet]
         [Authorize(Roles = "Admin")]
         public ActionResult Edit(int id)
         {
