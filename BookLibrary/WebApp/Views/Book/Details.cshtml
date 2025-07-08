@@ -43,7 +43,9 @@
 </div>
 
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.Book.Id" asp-route-returnUrl="@Model.ReturnUrl" class="btn btn-secondary">Edit</a>
+    @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Admin")) {
+        <a asp-action="Edit" asp-route-id="@Model.Book.Id" asp-route-returnUrl="@Model.ReturnUrl" class="btn btn-secondary">Edit</a>
+    }
 
     @if (Model.ReturnUrl != null)
     {
